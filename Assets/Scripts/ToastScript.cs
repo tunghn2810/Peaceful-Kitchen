@@ -9,7 +9,7 @@ public class ToastScript : MonoBehaviour
     private float moveSpeed = 25f;
 
     private PlayerControl playerControl;
-    int flip;
+    private int flip;
 
     bool isFadeOut;
 
