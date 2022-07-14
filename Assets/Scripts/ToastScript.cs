@@ -21,8 +21,9 @@ public class ToastScript : MonoBehaviour
         flip = playerControl.isFacingRight ? 1 : -1;
 
         rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
-    }
 
+        Destroy(gameObject, 5f);
+    }
     private void Disappear()
     {
         Destroy(gameObject);

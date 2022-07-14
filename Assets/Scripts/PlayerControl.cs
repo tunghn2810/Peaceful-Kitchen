@@ -14,8 +14,8 @@ public class PlayerControl : MonoBehaviour
     private SpriteRenderer[] sprites;
 
     private bool isGrounded;
-    public bool isFacingRight;
     private bool isAttacking;
+    public bool isFacingRight;
 
     private float jumpSpeed = 22f;
     private float moveSpeed = 10f;
@@ -31,6 +31,10 @@ public class PlayerControl : MonoBehaviour
 
     //For singleton
     private InputManager inputManager;
+
+    //For UI buttons
+    public bool isMoveLeft;
+    public bool isMoveRight;
 
     private void Awake()
     {
@@ -64,6 +68,10 @@ public class PlayerControl : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (ControlsManager.Instance.OnScreenControls.activeSelf == true)
+        {
+            Move();
+        }
         //Vector2 inputVector = playerInputActions.Player.Move.ReadValue<Vector2>();
         //
         //if (inputVector.x > 0)
@@ -131,6 +139,34 @@ public class PlayerControl : MonoBehaviour
     //    }
     //}
 
+    private void Move()
+    {
+        int moveDirection = 1;
+
+        if (isMoveLeft || isMoveRight)
+        {
+            if (isMoveLeft)
+            {
+                isFacingRight = false;
+                moveDirection = -1;
+            }
+            else if (isMoveRight)
+            {
+                isFacingRight = true;
+                moveDirection = 1;
+            }
+
+            anim.SetBool("isMoving", true);
+        }
+        else
+        {
+            moveDirection = 0;
+            anim.SetBool("isMoving", false);
+        }
+        rgbd.velocity = new Vector2(moveDirection * moveSpeed, rgbd.velocity.y);
+        anim.SetFloat("VelocityY", rgbd.velocity.y);
+    }
+
     public void Attack()
     {
         if (!isAttacking)
@@ -156,6 +192,7 @@ public class PlayerControl : MonoBehaviour
 
     }
 
+
     private void Bonk()
     {
         //TODO: Bonking stuffs
@@ -166,15 +203,35 @@ public class PlayerControl : MonoBehaviour
         isAttacking = false;
     }
 
-    public void TapTest(Vector2 position, float time)
+    public void TapTest(Vector2 position)
     {
-        if (position.x < 0)
+        Debug.Log("Tap");
+        if (position.x < gameObject.transform.position.x)
         {
             isFacingRight = false;
         }
-        else if (position.x > 0)
+        else if (position.x > gameObject.transform.position.x)
         {
             isFacingRight = true;
+        }
+        Attack();
+    }
+
+    public void SlideAttack(bool isLookingRight)
+    {
+        if (isLookingRight)
+        {
+            Debug.Log("Slide Right");
+            isFacingRight = true;
+            rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            rgbd.AddForce(Vector2.right * 20f, ForceMode2D.Impulse);
+        }
+        else
+        {
+            Debug.Log("Slide Left");
+            isFacingRight = false;
+            rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            rgbd.AddForce(Vector2.left * 20f, ForceMode2D.Impulse);
         }
         Attack();
     }

@@ -82,10 +82,12 @@ public class SwipeDetection : MonoBehaviour
         if (Vector2.Dot(Vector2.left, direction) > directionThreshold)
         {
             Debug.Log("Left");
+            playerControl.SlideAttack(false);
         }
         if (Vector2.Dot(Vector2.right, direction) > directionThreshold)
         {
             Debug.Log("Right");
+            playerControl.SlideAttack(true);
         }
     }
 }

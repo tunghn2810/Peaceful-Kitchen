@@ -19,7 +19,7 @@ public class InputManager : MonoBehaviour
     public event EndTouch OnEndTouch;
     
     //Tap
-    public delegate void Tap(Vector2 position, float time);
+    public delegate void Tap(Vector2 position);
     public event Tap OnTap;
 
     //Jump for keyboard
@@ -45,10 +45,20 @@ public class InputManager : MonoBehaviour
 
     private void OnEnable()
     {
-        playerInputActions.Enable();
+        //playerInputActions.Enable();
     }
 
     private void OnDisable()
+    {
+        //playerInputActions.Disable();
+    }
+
+    public void Enable()
+    {
+        playerInputActions.Enable();
+    }
+
+    public void Disable()
     {
         playerInputActions.Disable();
     }
@@ -86,7 +96,7 @@ public class InputManager : MonoBehaviour
 
         if (OnStartTouch != null)
         {
-            OnStartTouch(ScreenToWorld(mainCamera, playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>()), (float)context.startTime);
+            OnStartTouch(PrimaryPosition(), (float)context.startTime);
         }
     }
 
@@ -94,7 +104,7 @@ public class InputManager : MonoBehaviour
     {
         if (OnEndTouch != null)
         {
-            OnEndTouch(ScreenToWorld(mainCamera, playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>()), (float)context.time);
+            OnEndTouch(PrimaryPosition(), (float)context.time);
         }
     }
 
@@ -121,7 +131,7 @@ public class InputManager : MonoBehaviour
     {
         if (OnTap != null)
         {
-            OnTap(ScreenToWorld(mainCamera, playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>()), (float)context.startTime);
+            OnTap(PrimaryPosition());
         }
     }
 }

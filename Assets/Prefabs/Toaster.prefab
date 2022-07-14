@@ -250,6 +250,8 @@ MonoBehaviour:
   toast: {fileID: 2248652888496798528, guid: 29348bbeac1bcc6478de47e44c7ea138, type: 3}
   toastPos: {fileID: 4319024690423857145}
   shootPos: []
+  isMoveLeft: 0
+  isMoveRight: 0
 --- !u!95 &4319024690512435959
 Animator:
   serializedVersion: 4

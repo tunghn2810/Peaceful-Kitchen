@@ -7,6 +7,7 @@ public class EnemyScript : MonoBehaviour
     private Animator anim;
     private Rigidbody2D rgbd;
     private float moveSpeed = 5f;
+    private float currVelocity;
     private int flip;
 
     bool isDead = false;
@@ -14,6 +15,8 @@ public class EnemyScript : MonoBehaviour
     bool isFridge = false;
     bool activeOnce = true;
     private float jumpSpeed = 105f;
+
+    public GameObject dieParticle;
 
     private void Awake()
     {
@@ -29,7 +32,14 @@ public class EnemyScript : MonoBehaviour
             flip = -1;
         }
 
-        rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
+        //rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
+    }
+
+    public void SetSpeed(int p_flip)
+    {
+        transform.localScale = new Vector3(-transform.localScale.x * p_flip, transform.localScale.y, transform.localScale.z);
+        rgbd.velocity = new Vector2(moveSpeed * p_flip, rgbd.velocity.y);
+        currVelocity = rgbd.velocity.x;
     }
 
     private void FixedUpdate()
@@ -76,8 +86,19 @@ public class EnemyScript : MonoBehaviour
     {
         if (collision.gameObject.layer == 9) //9 is Weapon layer
         {
+            Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
             isDead = true;
             anim.SetBool("isDead", isDead);
+        }
+
+        if (collision.gameObject.layer == 7) //7 is Platform layer
+        {
+            if (collision.gameObject.tag == "Wall")
+            {
+                rgbd.velocity = new Vector2(-currVelocity, rgbd.velocity.y);
+                currVelocity = rgbd.velocity.x;
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            }
         }
     }
 

@@ -8,6 +8,7 @@ TagManager:
   - Meat
   - VegFridge
   - MeatFridge
+  - Wall
   layers:
   - Default
   - TransparentFX
