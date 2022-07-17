@@ -22,9 +22,15 @@ public class InputManager : MonoBehaviour
     public delegate void Tap(Vector2 position);
     public event Tap OnTap;
 
-    //Jump for keyboard
-    public delegate void JumpButton();
-    public event JumpButton OnJumpButton;
+    //Keyboard + Gamepad
+    public delegate void MoveButtonStart(Vector2 position);
+    public event MoveButtonStart OnMoveStart;
+    public delegate void MoveButtonEnd();
+    public event MoveButtonEnd OnMoveEnd;
+    public delegate void AttackButton();
+    public event AttackButton OnAttack;
+    public delegate void JumpButton(bool isHeld);
+    public event JumpButton OnJump;
 
     private void Awake()
     {
@@ -39,38 +45,36 @@ public class InputManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        //Application.targetFrameRate = 120;
+
         playerInputActions = new PlayerInputActions();
         mainCamera = Camera.main;
     }
 
     private void OnEnable()
     {
-        //playerInputActions.Enable();
-    }
-
-    private void OnDisable()
-    {
-        //playerInputActions.Disable();
-    }
-
-    public void Enable()
-    {
         playerInputActions.Enable();
     }
 
-    public void Disable()
+    private void OnDisable()
     {
         playerInputActions.Disable();
     }
 
     private void Start()
     {
+        //Swipe
         playerInputActions.Player_Swipe.PrimaryContact.started += ctx => StartTouchPrimary(ctx);
         playerInputActions.Player_Swipe.PrimaryContact.canceled += ctx => EndTouchPrimary(ctx);
 
-        playerInputActions.Player.Jump.performed += ctx => Jump(ctx);
-
+        //Tap
         playerInputActions.Player_Swipe.Tap.performed += ctx => TapPrimary(ctx);
+
+        //Keyboard + GamePad
+        playerInputActions.Player_Basic.Move.started += ctx => MoveStart(ctx);
+        playerInputActions.Player_Basic.Move.canceled += ctx => MoveEnd(ctx);
+        playerInputActions.Player_Basic.Attack.performed += ctx => Attack(ctx);
+        playerInputActions.Player_Basic.Jump.performed += ctx => Jump(ctx);
     }
 
     private void StartTouchPrimary(InputAction.CallbackContext context)
@@ -108,23 +112,17 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    //Supplement function to calculate the position that is pressed on the screen
     public Vector2 PrimaryPosition()
     {
         return ScreenToWorld(mainCamera, playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>());
     }
 
+    //Supplement function to calculate the ScreenToWorld position through the camera
     private Vector3 ScreenToWorld(Camera camera, Vector3 position)
     {
         position.z = camera.nearClipPlane;
         return camera.ScreenToWorldPoint(position);
-    }
-
-    private void Jump(InputAction.CallbackContext context)
-    {
-        if (OnJumpButton != null)
-        {
-            OnJumpButton();
-        }
     }
 
     private void TapPrimary(InputAction.CallbackContext context)
@@ -132,6 +130,38 @@ public class InputManager : MonoBehaviour
         if (OnTap != null)
         {
             OnTap(PrimaryPosition());
+        }
+    }
+
+    private void MoveStart(InputAction.CallbackContext context)
+    {
+        if (OnMoveStart != null)
+        {
+            OnMoveStart(playerInputActions.Player_Basic.Move.ReadValue<Vector2>());
+        }
+    }
+
+    private void MoveEnd(InputAction.CallbackContext context)
+    {
+        if (OnMoveEnd != null)
+        {
+            OnMoveEnd();
+        }
+    }
+
+    private void Attack(InputAction.CallbackContext context)
+    {
+        if (OnAttack != null)
+        {
+            OnAttack();
+        }
+    }
+
+    private void Jump(InputAction.CallbackContext context)
+    {
+        if (OnJump != null)
+        {
+            OnJump(context.ReadValueAsButton());
         }
     }
 }

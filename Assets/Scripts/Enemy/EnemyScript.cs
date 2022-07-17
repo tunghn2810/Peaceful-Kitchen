@@ -4,40 +4,44 @@ using UnityEngine;
 
 public class EnemyScript : MonoBehaviour
 {
+    //References
     private Animator anim;
     private Rigidbody2D rgbd;
+    public GameObject dieParticle;
+
+    //Stats
     private float moveSpeed = 5f;
     private float currVelocity;
-    private int flip;
+    private float flip;
 
-    bool isDead = false;
-    bool isJump = false;
-    bool isFridge = false;
-    bool activeOnce = true;
+    //Bool checks
+    private bool isDead = false;
+    private bool isJump = false;
+    private bool isFridge = false;
+    private bool activeOnce = true;
     private float jumpSpeed = 105f;
-
-    public GameObject dieParticle;
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
         rgbd = GetComponent<Rigidbody2D>();
 
-        if (gameObject.tag == "Vegetable")
-        {
-            flip = 1;
-        }
-        else if (gameObject.tag == "Meat")
-        {
-            flip = -1;
-        }
+        //if (gameObject.tag == "Vegetable")
+        //{
+        //    flip = 1;
+        //}
+        //else if (gameObject.tag == "Meat")
+        //{
+        //    flip = -1;
+        //}
 
         //rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
     }
 
+    //Set the speed of the enemy when it is spawned
     public void SetSpeed(int p_flip)
     {
-        transform.localScale = new Vector3(-transform.localScale.x * p_flip, transform.localScale.y, transform.localScale.z);
+        transform.localScale = new Vector3(transform.localScale.x * p_flip, transform.localScale.y, transform.localScale.z);
         rgbd.velocity = new Vector2(moveSpeed * p_flip, rgbd.velocity.y);
         currVelocity = rgbd.velocity.x;
     }
@@ -57,18 +61,20 @@ public class EnemyScript : MonoBehaviour
         }
         else
         {
+            //Stop moving horizontally when it dies
             rgbd.velocity = new Vector2(0, rgbd.velocity.y);
         }
 
+        //Jump when prompted to
         if (isJump)
         {
             rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
             isJump = false;
         }
         
+        //When it reaches the fridge - TODO
         if (isFridge && activeOnce)
         {
-            Debug.Log("ABCBBB");
             rgbd.AddForce(new Vector2(flip, 1) * jumpSpeed, ForceMode2D.Impulse);
 
             activeOnce = false;
@@ -84,14 +90,15 @@ public class EnemyScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == 9) //9 is Weapon layer
+        if (collision.gameObject.layer == Layer.Weapon)
         {
             Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
             isDead = true;
             anim.SetBool("isDead", isDead);
+            gameObject.layer = Layer.Default;
         }
 
-        if (collision.gameObject.layer == 7) //7 is Platform layer
+        if (collision.gameObject.layer == Layer.Platform)
         {
             if (collision.gameObject.tag == "Wall")
             {
@@ -104,11 +111,21 @@ public class EnemyScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == 11) //10 is JumpPad layer
+        if (collision.gameObject.layer == Layer.Weapon)
+        {
+            Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
+            isDead = true;
+            anim.SetBool("isDead", isDead);
+            gameObject.layer = Layer.Default;
+
+        }
+
+        if (collision.gameObject.layer == Layer.JumpPad)
         {
             isJump = true;
         }
-        else if (collision.gameObject.layer == 10) //10 is Fridge layer
+        
+        if (collision.gameObject.layer == Layer.Fridge)
         {
             isFridge = true;
         }

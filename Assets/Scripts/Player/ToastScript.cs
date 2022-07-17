@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class ToastScript : MonoBehaviour
 {
+    //References
     private Animator anim;
     private Rigidbody2D rgbd;
+    private PlayerControl playerControl;
+
+    //Stats
     private float moveSpeed = 25f;
 
-    private PlayerControl playerControl;
-    private int flip;
-
+    //Bool checks
+    private float flip;
     bool isFadeOut;
 
     private void Awake()
@@ -18,12 +21,14 @@ public class ToastScript : MonoBehaviour
         anim = GetComponent<Animator>();
         rgbd = GetComponent<Rigidbody2D>();
         playerControl = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControl>();
-        flip = playerControl.isFacingRight ? 1 : -1;
 
+        flip = playerControl.flip;
+        gameObject.transform.localScale = new Vector3(transform.localScale.x * flip, transform.localScale.y, transform.localScale.z);
         rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
 
         Destroy(gameObject, 5f);
     }
+
     private void Disappear()
     {
         Destroy(gameObject);
@@ -31,7 +36,7 @@ public class ToastScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == 6) //6 is Enemy layer
+        if (collision.gameObject.layer == Layer.Enemy)
         {
             isFadeOut = true;
             anim.SetBool("isFadeOut", isFadeOut);

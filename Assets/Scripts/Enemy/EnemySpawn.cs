@@ -11,28 +11,18 @@ public class EnemySpawn : MonoBehaviour
     //Spawn positions
     public Transform vegSpawn;
     public Transform meatSpawn;
-
     public Transform[] spawns;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            SpawnEnemy(bean, vegSpawn.position);
-        }
-        else if (Input.GetKeyDown(KeyCode.P))
-        {
-            SpawnEnemy(hotdog, meatSpawn.position);
-        }
-    }
-
+    //Instantly spawn enemy - is used by an on-screen button for testing
     private void SpawnEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn)
     {
         GameObject newEnemy = Instantiate(enemyToSpawn, positionToSpawn, Quaternion.identity);
     }
 
+    //Supplement function for auto spawning enemies
     public void SpawnTest(Transform spawn)
     {
+        //Determine the way the enemy is facing randomly
         int rnd = Random.Range(0, 99);
         int flip;
         if (rnd < 50)
@@ -43,12 +33,15 @@ public class EnemySpawn : MonoBehaviour
         {
             flip = 1;
         }
+
         GameObject newEnemy = Instantiate(hotdog, spawn.position, Quaternion.identity);
         newEnemy.GetComponent<EnemyScript>().SetSpeed(flip);
     }
 
+    //Spawn enemies automatically - is used by an on-screen button for testing
     public void AutoSpawn()
     {
+        //Determine the spawn position randomly
         int rnd = Random.Range(0, 79);
         Transform spawnPosition = gameObject.transform;
         if (rnd < 10)
@@ -88,7 +81,7 @@ public class EnemySpawn : MonoBehaviour
 
     public void ActiveAutoSpawn()
     {
-        InvokeRepeating("AutoSpawn", 1.0f, 3.0f);
+        InvokeRepeating("AutoSpawn", 1.0f, 3.0f); //Active 1 second after clicked, is called every 3 seconds
     }
 
     public void EndAutoSpawn()

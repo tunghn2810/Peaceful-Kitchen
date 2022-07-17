@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SwipeDetection : MonoBehaviour
 {
+    //Limits for swiping
     [SerializeField]
     private float minDistance = 0.2f;
     [SerializeField]
@@ -31,11 +32,23 @@ public class SwipeDetection : MonoBehaviour
 
     private void OnEnable()
     {
+        //inputManager.OnStartTouch += SwipeStart;
+        //inputManager.OnEndTouch += SwipeEnd;
+    }
+
+    private void OnDisable()
+    {
+        //inputManager.OnStartTouch -= SwipeStart;
+        //inputManager.OnEndTouch -= SwipeEnd;
+    }
+
+    public void SwipeModeOn()
+    {
         inputManager.OnStartTouch += SwipeStart;
         inputManager.OnEndTouch += SwipeEnd;
     }
 
-    private void OnDisable()
+    public void SwipeModeOff()
     {
         inputManager.OnStartTouch -= SwipeStart;
         inputManager.OnEndTouch -= SwipeEnd;
@@ -60,7 +73,7 @@ public class SwipeDetection : MonoBehaviour
         if (Vector3.Distance(startPosition, endPosition) >= minDistance &&
             (endTime - startTime) <= maxTime)
         {
-            Debug.DrawLine(startPosition, endPosition, Color.red, 5f);
+            Debug.DrawLine(startPosition, endPosition, Color.red, 5f); //Draw a line in the scene view in the Editor
 
             Vector3 direction = endPosition - startPosition;
             Vector2 direction2D = new Vector2(direction.x, direction.y).normalized;
@@ -73,7 +86,7 @@ public class SwipeDetection : MonoBehaviour
         if (Vector2.Dot(Vector2.up, direction) > directionThreshold)
         {
             Debug.Log("Up");
-            playerControl.Jump();
+            playerControl.JumpSwipe();
         }
         if (Vector2.Dot(Vector2.down, direction) > directionThreshold)
         {
