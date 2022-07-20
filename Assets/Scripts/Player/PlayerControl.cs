@@ -9,6 +9,7 @@ public class PlayerControl : MonoBehaviour
     //References
     private Rigidbody2D rgbd;
     private Animator anim;
+    public GameObject dieEffect;
 
     //Bool checks
     public bool isGrounded;
@@ -16,22 +17,23 @@ public class PlayerControl : MonoBehaviour
     private bool isMoving; //When the move button is being held
     private bool isJumping; //When the jump button is being held
     private float moveDirection; //Move direction updated by input direction (up, down, left, right)
-    
+
+    //Special bool checks for slamming with cutting board
+    public bool isSlaming = false;
+    public bool isRecovering = false;
+
     //Flip - x of move direction
     public float flip = 1; //1 is not flip, -1 is flip
 
     //General stats
     private float jumpSpeed = 22f;
-    private float moveSpeed = 10f;
+    public float moveSpeed = 10f; //Base speed. Characters may change this
 
-    //For singleton
-    private InputManager inputManager;
+    //Currently active
+    public bool isCurrent = true;
 
     private void Awake()
     {
-        //For singleton
-        inputManager = InputManager.Instance;
-
         //References
         rgbd = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -39,18 +41,18 @@ public class PlayerControl : MonoBehaviour
 
     public void BasicModeOn()
     {
-        inputManager.OnMoveStart += MoveStart;
-        inputManager.OnMoveEnd += MoveEnd;
-        inputManager.OnJump += Jump;
-        inputManager.OnAttack += Attack;
+        InputManager.Instance.OnMoveStart += MoveStart;
+        InputManager.Instance.OnMoveEnd += MoveEnd;
+        InputManager.Instance.OnJump += Jump;
+        InputManager.Instance.OnAttack += Attack;
     }
 
     public void BasicModeOff()
     {
-        inputManager.OnMoveStart -= MoveStart;
-        inputManager.OnMoveEnd -= MoveEnd;
-        inputManager.OnJump -= Jump;
-        inputManager.OnAttack -= Attack;
+        InputManager.Instance.OnMoveStart -= MoveStart;
+        InputManager.Instance.OnMoveEnd -= MoveEnd;
+        InputManager.Instance.OnJump -= Jump;
+        InputManager.Instance.OnAttack -= Attack;
     }
 
     private void Update()
@@ -70,24 +72,45 @@ public class PlayerControl : MonoBehaviour
             //TODO
         }
 
-        //For Basic control
+        //For Basic control & Dpad control
         if (ControlsManager.Instance.currentMode == 1)
         {
-            //Update velocity every frame
-            if (isMoving)
+            if (!isSlaming)
             {
-                rgbd.velocity = new Vector2(moveDirection * moveSpeed, rgbd.velocity.y);
-            }
-            else
-            {
-                rgbd.velocity = new Vector2(0, rgbd.velocity.y);
-            }
+                //Update velocity every frame
+                if (isMoving)
+                {
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, rgbd.velocity.y);
+                }
+                else
+                {
+                    rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                }
 
-            //Jump if the Jump button is held and the character is grounded
-            if (isJumping && isGrounded)
+                //Jump if the Jump button is held and the character is grounded
+                if (isJumping && isGrounded)
+                {
+                    rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
+                    rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
+                }
+            }
+            else //Only happens when slamming
             {
-                rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
-                rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
+                if (isGrounded)
+                {
+                    if (isRecovering)
+                    {
+                        rgbd.velocity = new Vector2(0, 0);
+                    }
+                    else
+                    {
+                        rgbd.velocity = new Vector2(moveDirection * moveSpeed, 0);
+                    }
+                }
+                else
+                {
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -25f);
+                }
             }
         }
     }
@@ -110,7 +133,7 @@ public class PlayerControl : MonoBehaviour
     }
 
     //When the Move button is pressed
-    private void MoveStart(Vector2 direction)
+    public void MoveStart(Vector2 direction)
     {
         isMoving = true;
         moveDirection = flip = direction.x;
@@ -118,7 +141,7 @@ public class PlayerControl : MonoBehaviour
     }
 
     //When the Move button is released
-    private void MoveEnd()
+    public void MoveEnd()
     {
         isMoving = false;
         moveDirection = 0;
@@ -154,7 +177,6 @@ public class PlayerControl : MonoBehaviour
 
     public void TapTest(Vector2 position)
     {
-        Debug.Log("Tap");
         if (position.x < gameObject.transform.position.x)
         {
             flip = -1;
@@ -170,18 +192,35 @@ public class PlayerControl : MonoBehaviour
     {
         if (isLookingRight)
         {
-            Debug.Log("Slide Right");
             flip = 1;
             rgbd.velocity = new Vector2(0, rgbd.velocity.y);
             rgbd.AddForce(Vector2.right * 20f, ForceMode2D.Impulse);
+            transform.localScale = new Vector3(transform.localScale.x * Flip(flip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
         else
         {
-            Debug.Log("Slide Left");
             flip = -1;
             rgbd.velocity = new Vector2(0, rgbd.velocity.y);
             rgbd.AddForce(Vector2.left * 20f, ForceMode2D.Impulse);
+            transform.localScale = new Vector3(transform.localScale.x * Flip(flip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
         Attack();
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == Layer.Enemy)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        //Spawn the particle effect
+        GameObject particle = Instantiate(dieEffect, gameObject.transform.position, dieEffect.transform.rotation);
+        Destroy(particle, 3.0f);
+
+        gameObject.SetActive(false);
     }
 }

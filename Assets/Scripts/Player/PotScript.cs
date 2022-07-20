@@ -5,15 +5,21 @@ using UnityEngine;
 public class PotScript : MonoBehaviour
 {
     private GameObject hitBox;
+    private PlayerControl playerControl;
 
     private void Awake()
     {
         hitBox = transform.GetChild(2).gameObject;
+        playerControl = GetComponent<PlayerControl>();
+        playerControl.moveSpeed = 10;
     }
 
     private void Bonk()
     {
-        hitBox.SetActive(true);
+        if (playerControl.isCurrent)
+        {
+            hitBox.SetActive(true);
+        }
     }
 
     private void BonkEnd()

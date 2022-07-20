@@ -13,6 +13,7 @@ public class EnemyScript : MonoBehaviour
     private float moveSpeed = 5f;
     private float currVelocity;
     private float flip;
+    private float health = 30f;
 
     //Bool checks
     private bool isDead = false;
@@ -73,14 +74,14 @@ public class EnemyScript : MonoBehaviour
         }
         
         //When it reaches the fridge - TODO
-        if (isFridge && activeOnce)
-        {
-            rgbd.AddForce(new Vector2(flip, 1) * jumpSpeed, ForceMode2D.Impulse);
-
-            activeOnce = false;
-
-            Destroy(gameObject, 5);
-        }
+        //if (isFridge && activeOnce)
+        //{
+        //    rgbd.AddForce(new Vector2(flip, 1) * jumpSpeed, ForceMode2D.Impulse);
+        //
+        //    activeOnce = false;
+        //
+        //    Destroy(gameObject, 5);
+        //}
     }
 
     private void Die()
@@ -88,14 +89,26 @@ public class EnemyScript : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private void Explode()
+    {
+        Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
+        isDead = true;
+        anim.SetBool("isDead", isDead);
+        gameObject.layer = Layer.NoCol;
+    }    
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == Layer.Weapon)
         {
-            Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
-            isDead = true;
-            anim.SetBool("isDead", isDead);
-            gameObject.layer = Layer.Default;
+            if (health > 0)
+            {
+                health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
+            }
+            else
+            {
+                Explode();
+            }
         }
 
         if (collision.gameObject.layer == Layer.Platform)
@@ -113,11 +126,19 @@ public class EnemyScript : MonoBehaviour
     {
         if (collision.gameObject.layer == Layer.Weapon)
         {
-            Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
-            isDead = true;
-            anim.SetBool("isDead", isDead);
-            gameObject.layer = Layer.Default;
+            if (collision.gameObject.tag == "Toast")
+            {
+                collision.gameObject.GetComponent<ToastScript>().Die();
+            }
 
+            if (health > 0)
+            {
+                health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
+            }
+            else
+            {
+                Explode();
+            }
         }
 
         if (collision.gameObject.layer == Layer.JumpPad)
@@ -128,6 +149,10 @@ public class EnemyScript : MonoBehaviour
         if (collision.gameObject.layer == Layer.Fridge)
         {
             isFridge = true;
+
+            GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().TakeDamage();
+
+            Explode();
         }
     }
 }

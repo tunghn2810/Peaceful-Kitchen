@@ -13,4 +13,6 @@ public class Layer
     public static readonly int JumpPad = 11;
     public static readonly int SugarCube = 12;
     public static readonly int GroundCheck = 13;
+    public static readonly int Invincible = 14;
+    public static readonly int NoCol = 15;
 }

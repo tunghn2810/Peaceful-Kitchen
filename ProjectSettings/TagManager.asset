@@ -9,6 +9,13 @@ TagManager:
   - VegFridge
   - MeatFridge
   - Wall
+  - LeftArrow
+  - RightArrow
+  - JumpButton
+  - AttackButton
+  - Toast
+  - Ladle
+  - Board
   layers:
   - Default
   - TransparentFX
@@ -24,8 +31,8 @@ TagManager:
   - JumpPad
   - SugarCube
   - GroundCheck
-  - 
-  - 
+  - Invincible
+  - NoCol
   - 
   - 
   - 
@@ -48,4 +55,7 @@ TagManager:
     locked: 0
   - name: Weapons
     uniqueID: 3121763059
+    locked: 0
+  - name: UI
+    uniqueID: 4147881185
     locked: 0

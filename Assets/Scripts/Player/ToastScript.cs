@@ -34,12 +34,18 @@ public class ToastScript : MonoBehaviour
         Destroy(gameObject);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    if (collision.gameObject.layer == Layer.Enemy)
+    //    {
+    //        Die();
+    //    }
+    //}
+
+    public void Die()
     {
-        if (collision.gameObject.layer == Layer.Enemy)
-        {
-            isFadeOut = true;
-            anim.SetBool("isFadeOut", isFadeOut);
-        }
+        isFadeOut = true;
+        anim.SetBool("isFadeOut", isFadeOut);
+        gameObject.layer = Layer.NoCol;
     }
 }

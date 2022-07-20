@@ -4,36 +4,29 @@ using UnityEngine;
 
 public class SugarScript : MonoBehaviour
 {
-    //For singleton
-    private ControlsManager controlsManager;
-
     //References
     public GameObject transformEffect;
-
-    private void Awake()
-    {
-        //For singleton
-        controlsManager = ControlsManager.Instance;
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         //When the player touches a cube
-        if (collision.gameObject.layer == Layer.Player)
+        if (collision.gameObject.layer == Layer.Player || collision.gameObject.layer == Layer.Invincible)
         {
-            //Run the particle effect
+            //Spawn the particle effect
             GameObject particle = Instantiate(transformEffect, gameObject.transform.position, transformEffect.transform.rotation);
             Destroy(particle, 3.0f);
 
             //Transform the player
-            controlsManager.Transformation();
+            ControlsManager.Instance.Transformation();
 
             //Switch control - Currently not needed
-            controlsManager.ControlInit();
+            ControlsManager.Instance.ControlInit();
 
             //Create a new cube
-            Debug.Log(collision.gameObject.name);
             SugarSpawnScript.Instance.SpawnCube();
+
+            //Increase score by 1
+            ScoreScript.Instance.score++;
 
             //Destroy the old cube
             Destroy(gameObject);

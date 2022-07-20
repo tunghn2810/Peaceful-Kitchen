@@ -11,7 +11,7 @@ public class CameraScript : MonoBehaviour
     public Transform target;
     private Vector3 offset;
 
-    public float smoothSpeed = 0.05f;
+    public float smoothSpeed = 0.01f;
 
     private void Awake()
     {
@@ -41,9 +41,13 @@ public class CameraScript : MonoBehaviour
     //Smoothly follow the player
     private void SmoothFollow()
     {
-        Vector3 targetPos = target.position + offset;
-        Vector3 smoothFollow = Vector3.Lerp(transform.position, targetPos, smoothSpeed);
+        if (target != null)
+        {
+            Vector3 targetPos = target.position + offset;
 
-        transform.position = smoothFollow;
+            //Vector3 smoothFollow = Vector3.Lerp(transform.position, targetPos, smoothSpeed);
+            //transform.position = smoothFollow;
+            transform.position = targetPos;
+        }
     }
 }

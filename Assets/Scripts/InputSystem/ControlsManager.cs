@@ -7,21 +7,19 @@ public class ControlsManager : MonoBehaviour
     //Singleton
     public static ControlsManager Instance { get; set; }
 
-    //References
-    //PlayerControl playerControl;
-    //SwipeDetection swipeDetection;
-
-    //Test - Control all characters
+    //Lists of control scripts for all characters
     List<SwipeDetection> swipeDetections = new List<SwipeDetection>();
     List<PlayerControl> playerControls = new List<PlayerControl>();
 
-    public int currentMode = -1; //-1 is nothing, 0 is Swipe, 1 is Basic
+    //For switching controls
+    public int currentMode = -1; //0 is Swipe, 1 is Basic, 2 is Dpad
     public GameObject OnScreenControls;
 
+    //For switching characters
     public Transform startPos;
-    [SerializeField] private GameObject[] playerCharacters;
-    [SerializeField] private GameObject currentCharacter;
-    [SerializeField] private int currentCharacterIndex;
+    private GameObject[] playerCharacters;
+    public GameObject currentCharacter;
+    private int currentCharacterIndex;
     private Vector3 lastPos;
     private Vector3 lastVel;
 
@@ -40,6 +38,9 @@ public class ControlsManager : MonoBehaviour
 
         PlayerInit();
         ControlInit();
+        
+        //Testing only
+        BasicControl();
     }
 
     private void PlayerInit()
@@ -50,7 +51,8 @@ public class ControlsManager : MonoBehaviour
 
         for (int i = 1; i < playerCharacters.Length; i++)
         {
-            playerCharacters[i].SetActive(false);
+            //playerCharacters[i].SetActive(false);
+            TempDisable(playerCharacters[i]);
         }
 
         currentCharacter.transform.position = startPos.position;
@@ -58,36 +60,17 @@ public class ControlsManager : MonoBehaviour
 
     public void ControlInit()
     {
-        //playerControl = currentCharacter.GetComponent<PlayerControl>();
-        //swipeDetection = currentCharacter.GetComponent<SwipeDetection>();
-
-        //Test - Control all characters
+        //Add characters control scripts to the list
         for (int i = 0; i < playerCharacters.Length; i++)
         {
-            //swipeDetections[i] = playerCharacters[i].GetComponent<SwipeDetection>();
-            //playerControls[i] = playerCharacters[i].GetComponent<PlayerControl>();
-
             swipeDetections.Add(playerCharacters[i].GetComponent<SwipeDetection>());
             playerControls.Add(playerCharacters[i].GetComponent<PlayerControl>());
-        }
-
-        //Only runs when player transforms
-        if (currentMode == 0)
-        {
-            SwipeControl();
-        }
-        else if (currentMode == 1)
-        {
-            BasicControl();
         }
     }
 
     public void SwipeControl()
     {
-        //swipeDetection.SwipeModeOn();
-        //playerControl.BasicModeOff();
-
-        //Test - Control all characters
+        //Turn on swipe control for all characters
         for (int i = 0; i < playerCharacters.Length; i++)
         {
             swipeDetections[i].SwipeModeOn();
@@ -100,10 +83,7 @@ public class ControlsManager : MonoBehaviour
 
     public void BasicControl()
     {
-        //swipeDetection.SwipeModeOff();
-        //playerControl.BasicModeOn();
-
-        //Test - Control all characters
+        //Turn on basic control for all characters
         for (int i = 0; i < playerCharacters.Length; i++)
         {
             swipeDetections[i].SwipeModeOff();
@@ -125,7 +105,7 @@ public class ControlsManager : MonoBehaviour
         {
             int rnd = Random.Range(0, playerCharacters.Length);
             
-            //Avoid repeating position
+            //Avoid repeating same character
             if (rnd != currentCharacterIndex)
             {
                 currentCharacterIndex = rnd;
@@ -133,12 +113,34 @@ public class ControlsManager : MonoBehaviour
             }
         }
 
-        currentCharacter.SetActive(false); //Disable last character
+        TempDisable(currentCharacter); //Disable current character
         currentCharacter = playerCharacters[currentCharacterIndex]; //Set next character
-        currentCharacter.SetActive(true); //Enable next character
+        TempEnable(currentCharacter); //Enable next character
         currentCharacter.transform.position = lastPos; //Bring last position to the new one
         currentCharacter.GetComponent<Rigidbody2D>().velocity = lastVel; //Bring last velocity to the new one
 
         CameraScript.Instance.target = currentCharacter.transform; //Set camera to point at the new one
+    }
+
+    //Temporarily disable some components of the inactive characters
+    private void TempDisable(GameObject character)
+    {
+        for (int i = 0; i < character.transform.childCount; i++)
+        {
+            character.transform.GetChild(i).gameObject.SetActive(false);
+        }
+        character.GetComponent<Rigidbody2D>().simulated = false;
+        character.GetComponent<PlayerControl>().isCurrent = false;
+    }
+
+    //Temporarily enable components the character being transformed into
+    private void TempEnable(GameObject character)
+    {
+        for (int i = 0; i < character.transform.childCount; i++)
+        {
+            character.transform.GetChild(i).gameObject.SetActive(true);
+        }
+        character.GetComponent<Rigidbody2D>().simulated = true;
+        character.GetComponent<PlayerControl>().isCurrent = true;
     }
 }

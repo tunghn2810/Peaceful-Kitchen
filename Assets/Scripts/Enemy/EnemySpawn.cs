@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class EnemySpawn : MonoBehaviour
 {
@@ -12,6 +13,12 @@ public class EnemySpawn : MonoBehaviour
     public Transform vegSpawn;
     public Transform meatSpawn;
     public Transform[] spawns;
+
+    //Level
+    public TMP_Text levelText;
+    public float level = 0;
+
+    private bool isSpawning= false;
 
     //Instantly spawn enemy - is used by an on-screen button for testing
     private void SpawnEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn)
@@ -81,11 +88,36 @@ public class EnemySpawn : MonoBehaviour
 
     public void ActiveAutoSpawn()
     {
-        InvokeRepeating("AutoSpawn", 1.0f, 3.0f); //Active 1 second after clicked, is called every 3 seconds
+        if (!isSpawning)
+        {
+            InvokeRepeating("AutoSpawn", 1.0f, 3.0f - level); //Active 1 second after clicked, is called every 3 seconds
+            isSpawning = true;
+        }
     }
 
     public void EndAutoSpawn()
     {
         CancelInvoke();
+
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Meat");
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Destroy(enemies[i]);
+        }
+
+        isSpawning = false;
+    }
+
+    public void ChangeLevel()
+    {
+        if (level < 2)
+        {
+            level++;
+        }
+        else
+        {
+            level = 0;
+        }
+        levelText.text = level.ToString();
     }
 }
