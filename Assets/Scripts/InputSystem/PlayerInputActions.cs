@@ -223,7 +223,7 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""7350eeed-a892-4a2d-b084-18d3bf8b186f"",
                     ""path"": ""<Gamepad>/buttonNorth"",
-                    ""interactions"": ""Hold(duration=3)"",
+                    ""interactions"": ""Hold(duration=1)"",
                     ""processors"": """",
                     ""groups"": ""GamePad"",
                     ""action"": ""Reset"",

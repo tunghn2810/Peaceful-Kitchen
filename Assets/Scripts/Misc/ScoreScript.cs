@@ -8,6 +8,8 @@ public class ScoreScript : MonoBehaviour
     public TMP_Text scoreText;
     public int score = 0;
 
+    private bool runOnce = true;
+
     //Singleton
     public static ScoreScript Instance { get; set; }
 
@@ -28,5 +30,35 @@ public class ScoreScript : MonoBehaviour
     private void LateUpdate()
     {
         scoreText.text = score.ToString();
+
+        if (score == 5)
+        {
+            if (runOnce)
+            {
+                GameStateScript.Instance.canSpawnTier2_1 = true;
+                GameStateScript.Instance.canSpawnTier2_2 = true;
+                runOnce = false;
+            }
+        }
+        else if (score == 7)
+        {
+            if (runOnce)
+            {
+                GameStateScript.Instance.canSpawnAir = true;
+                runOnce = false;
+            }
+        }
+        else if (score == 10)
+        {
+            if (runOnce)
+            {
+                GameStateScript.Instance.canSpawnMid = true;
+                runOnce = false;
+            }
+        }
+        else
+        {
+            runOnce = true;
+        }
     }
 }

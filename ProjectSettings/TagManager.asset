@@ -16,6 +16,8 @@ TagManager:
   - Toast
   - Ladle
   - Board
+  - RiceBall
+  - SugarCube
   layers:
   - Default
   - TransparentFX
@@ -23,21 +25,21 @@ TagManager:
   - 
   - Water
   - UI
-  - Enemy
+  - 
   - Platform
-  - Player
-  - Weapon
+  - Player_Veg
+  - Player_Meat
   - Fridge
   - JumpPad
   - SugarCube
   - GroundCheck
   - Invincible
   - NoCol
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Weapon_Veg
+  - Weapon_Meat
+  - PlatformWall
+  - Enemy_Veg
+  - Enemy_Meat
   - 
   - 
   - 
@@ -53,9 +55,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Platforms
+    uniqueID: 3250939213
+    locked: 0
+  - name: Characters
+    uniqueID: 1715362033
+    locked: 0
   - name: Weapons
     uniqueID: 3121763059
     locked: 0
   - name: UI
     uniqueID: 4147881185
+    locked: 0
+  - name: Pointer
+    uniqueID: 2636484039
     locked: 0

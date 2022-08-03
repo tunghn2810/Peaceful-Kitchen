@@ -7,7 +7,6 @@ public class EnemyScript : MonoBehaviour
     //References
     private Animator anim;
     private Rigidbody2D rgbd;
-    public GameObject dieParticle;
 
     //Stats
     private float moveSpeed = 5f;
@@ -18,25 +17,12 @@ public class EnemyScript : MonoBehaviour
     //Bool checks
     private bool isDead = false;
     private bool isJump = false;
-    private bool isFridge = false;
-    private bool activeOnce = true;
     private float jumpSpeed = 105f;
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
         rgbd = GetComponent<Rigidbody2D>();
-
-        //if (gameObject.tag == "Vegetable")
-        //{
-        //    flip = 1;
-        //}
-        //else if (gameObject.tag == "Meat")
-        //{
-        //    flip = -1;
-        //}
-
-        //rgbd.velocity = new Vector2(moveSpeed * flip, rgbd.velocity.y);
     }
 
     //Set the speed of the enemy when it is spawned
@@ -51,14 +37,7 @@ public class EnemyScript : MonoBehaviour
     {
         if (!isDead)
         {
-            //if (gameObject.tag == "Vegetable")
-            //{
-            //    rgbd.velocity = new Vector2(moveSpeed, rgbd.velocity.y);
-            //}
-            //else if (gameObject.tag == "Meat")
-            //{
-            //    rgbd.velocity = new Vector2(moveSpeed * -1.0f, rgbd.velocity.y);
-            //}
+            rgbd.velocity = new Vector2(currVelocity, rgbd.velocity.y);
         }
         else
         {
@@ -72,16 +51,6 @@ public class EnemyScript : MonoBehaviour
             rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
             isJump = false;
         }
-        
-        //When it reaches the fridge - TODO
-        //if (isFridge && activeOnce)
-        //{
-        //    rgbd.AddForce(new Vector2(flip, 1) * jumpSpeed, ForceMode2D.Impulse);
-        //
-        //    activeOnce = false;
-        //
-        //    Destroy(gameObject, 5);
-        //}
     }
 
     private void Die()
@@ -91,7 +60,7 @@ public class EnemyScript : MonoBehaviour
 
     private void Explode()
     {
-        Instantiate(dieParticle, gameObject.transform.position, Quaternion.identity);
+        Instantiate(EffectReferences.Instance.enemyDie, gameObject.transform.position, Quaternion.identity);
         isDead = true;
         anim.SetBool("isDead", isDead);
         gameObject.layer = Layer.NoCol;
@@ -99,8 +68,18 @@ public class EnemyScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == Layer.Weapon)
+        if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
         {
+            if (collision.gameObject.tag == "Toast")
+            {
+                collision.gameObject.GetComponent<ToastScript>().Die();
+            }
+
+            if (collision.gameObject.tag == "RiceBall")
+            {
+                collision.gameObject.GetComponent<RiceScript>().Explode();
+            }
+
             if (health > 0)
             {
                 health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
@@ -109,6 +88,10 @@ public class EnemyScript : MonoBehaviour
             {
                 Explode();
             }
+
+            int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
+            GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
+            Destroy(hitEffect, 1.0f);
         }
 
         if (collision.gameObject.layer == Layer.Platform)
@@ -124,13 +107,8 @@ public class EnemyScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == Layer.Weapon)
+        if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
         {
-            if (collision.gameObject.tag == "Toast")
-            {
-                collision.gameObject.GetComponent<ToastScript>().Die();
-            }
-
             if (health > 0)
             {
                 health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
@@ -139,6 +117,10 @@ public class EnemyScript : MonoBehaviour
             {
                 Explode();
             }
+
+            int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
+            GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
+            Destroy(hitEffect, 1.0f);
         }
 
         if (collision.gameObject.layer == Layer.JumpPad)
@@ -148,9 +130,14 @@ public class EnemyScript : MonoBehaviour
         
         if (collision.gameObject.layer == Layer.Fridge)
         {
-            isFridge = true;
-
-            GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().TakeDamage();
+            if (gameObject.layer == Layer.Enemy_Veg && collision.gameObject.tag == "MeatFridge")
+            {
+                GameObject.FindGameObjectWithTag("MeatFridge").GetComponent<FridgeScript>().TakeDamage();
+            }
+            else if (gameObject.layer == Layer.Enemy_Meat && collision.gameObject.tag == "VegFridge")
+            {
+                GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().TakeDamage();
+            }
 
             Explode();
         }

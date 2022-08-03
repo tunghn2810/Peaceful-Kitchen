@@ -9,22 +9,55 @@ public class WeaponScript : MonoBehaviour
     private void Awake()
     {
         type = gameObject.tag;
+        ChangeLayer();
     }
 
     public float Damage()
     {
         if (type == "Toast")
         {
-            return 10f;
+            return 15f;
         }
         else if (type == "Ladle")
         {
-            return 15f;
+            return 30f;
         }
         else if (type == "Board")
         {
             return 30f;
         }
+        else if (type == "RiceBall")
+        {
+            return 30f;
+        }
+        //ADD NEW WEAPON HERE
         return 0; //Never happens
+    }
+
+    private void ChangeLayer()
+    {
+        if (ControlsManager.Instance.currentLayer == Layer.Player_Veg)
+        {
+            gameObject.layer = Layer.Weapon_Veg;
+        }
+        else
+        {
+            gameObject.layer = Layer.Weapon_Meat;
+        }
+
+        for (int i = 0; i < gameObject.transform.childCount; i++)
+        {
+            if (gameObject.transform.GetChild(i).gameObject.layer != Layer.GroundCheck)
+            {
+                gameObject.transform.GetChild(i).gameObject.layer = gameObject.layer;
+            }
+        }
+    }
+
+    public void SpawnEffect(Vector3 spawnPos)
+    {
+        //Spawn the particle effect
+        //GameObject particle = Instantiate(transformEffect, spawnPos, transformEffect.transform.rotation);
+        //Destroy(particle, 1.0f);
     }
 }

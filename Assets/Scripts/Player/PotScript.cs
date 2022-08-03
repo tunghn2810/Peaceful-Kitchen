@@ -22,7 +22,7 @@ public class PotScript : MonoBehaviour
         }
     }
 
-    private void BonkEnd()
+    public void BonkEnd()
     {
         hitBox.SetActive(false);
     }

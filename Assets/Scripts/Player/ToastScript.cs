@@ -34,13 +34,13 @@ public class ToastScript : MonoBehaviour
         Destroy(gameObject);
     }
 
-    //private void OnCollisionEnter2D(Collision2D collision)
-    //{
-    //    if (collision.gameObject.layer == Layer.Enemy)
-    //    {
-    //        Die();
-    //    }
-    //}
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == Layer.Platform || collision.gameObject.layer == Layer.PlatformWall)
+        {
+            Die();
+        }
+    }
 
     public void Die()
     {

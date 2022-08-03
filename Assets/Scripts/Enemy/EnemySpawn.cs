@@ -5,14 +5,26 @@ using TMPro;
 
 public class EnemySpawn : MonoBehaviour
 {
+    //Singleton
+    public static EnemySpawn Instance { get; set; }
+
     //Enemy prefabs
     public GameObject bean;
+    public GameObject eggplant;
+    public GameObject corn;
     public GameObject hotdog;
+    public GameObject chicken;
+    public GameObject meatball;
 
     //Spawn positions
     public Transform vegSpawn;
     public Transform meatSpawn;
-    public Transform[] spawns;
+    public Transform bothSpawn;
+    public Transform[] airSpawns;
+
+    //For testing only
+    private Transform[] spawns;
+    private int currentSpawnIndex = -1;
 
     //Level
     public TMP_Text levelText;
@@ -20,10 +32,184 @@ public class EnemySpawn : MonoBehaviour
 
     private bool isSpawning= false;
 
+    private void Awake()
+    {
+        //Singleton
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     //Instantly spawn enemy - is used by an on-screen button for testing
-    private void SpawnEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn)
+    private void SpawnEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn, int flip)
     {
         GameObject newEnemy = Instantiate(enemyToSpawn, positionToSpawn, Quaternion.identity);
+        newEnemy.GetComponent<EnemyScript>().SetSpeed(flip);
+    }
+
+    private void SpawnAirEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn, int flip)
+    {
+        GameObject newEnemy = Instantiate(enemyToSpawn, positionToSpawn, Quaternion.identity);
+        newEnemy.GetComponent<EnemyFlyingScript>().SetSpeed(flip);
+    }
+
+    private void Start()
+    {
+        //StartCoroutine(SpawnWave(bean, eggplant, vegSpawn.position, -1));
+        //StartCoroutine(SpawnWave(hotdog, chicken, meatSpawn.position, 1));
+        //StartCoroutine(SpawnMid());
+        //StartCoroutine(SpawnAir());
+    }
+
+    //Spawn a wave of only tier 1 enemy (0 = bean, 1 = hotdog)
+    public void Tier1(int type, float waitTime)
+    {
+        if (type == 0)
+        {
+            StartCoroutine(SpawnWaveTier1(bean, vegSpawn.position, -1, waitTime));
+        }
+        else if (type == 1)
+        {
+            StartCoroutine(SpawnWaveTier1(hotdog, meatSpawn.position, 1, waitTime));
+        }
+    }
+
+    //Spawn a wave that can have both tier 1 and tier 2 enemies (0 = veg, 1 = meat)
+    public void BothTier(int type, float waitTime)
+    {
+        if (type == 0)
+        {
+            StartCoroutine(SpawnWave(bean, eggplant, vegSpawn.position, -1, waitTime));
+        }
+        else if (type == 1)
+        {
+            StartCoroutine(SpawnWave(hotdog, chicken, meatSpawn.position, 1, waitTime));
+        }
+    }
+
+    //Spawn a wave in the middle spawn (should have different timing from the normal spawns)
+    public void Mid(float waitTime)
+    {
+        StartCoroutine(SpawnMid(waitTime));
+    }
+
+    //Spawn a wave of flying enemies
+    public void Flying(float waitTime)
+    {
+        StartCoroutine(SpawnAir(waitTime));
+    }
+
+    IEnumerator SpawnWaveTier1(GameObject tier1, Vector3 spawnPos, int flip, float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        for (int i = 0; i < 3; i++)
+        {
+            SpawnEnemy(tier1, spawnPos, flip);
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (tier1 == bean)
+        {
+            GameStateScript.Instance.canSpawnTier1_1 = true;
+        }
+        else
+        {
+            GameStateScript.Instance.canSpawnTier1_2 = true;
+        }
+    }
+
+    IEnumerator SpawnWave(GameObject tier1, GameObject tier2, Vector3 spawnPos, int flip, float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        for (int i = 0; i < 3; i++)
+        {
+            int rnd = Random.Range(0, 100);
+            if (rnd < 70)
+            {
+                SpawnEnemy(tier1, spawnPos, flip);
+            }
+            else
+            {
+                SpawnEnemy(tier2, spawnPos, flip);
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (tier1 == bean)
+        {
+            GameStateScript.Instance.canSpawnTier2_1 = true;
+        }
+        else
+        {
+            GameStateScript.Instance.canSpawnTier2_2 = true;
+        }
+    }
+
+    IEnumerator SpawnMid(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        for (int i = 0; i < 4; i++)
+        {
+            int rndTier = Random.Range(0, 100);
+            int rndType = Random.Range(0, 100);
+
+            if (rndTier < 70)
+            {
+                if (rndType < 50)
+                {
+                    SpawnEnemy(bean, bothSpawn.position, -1);
+                }
+                else
+                {
+                    SpawnEnemy(hotdog, bothSpawn.position, 1);
+                }
+            }
+            else
+            {
+                if (rndType < 50)
+                {
+                    SpawnEnemy(eggplant, bothSpawn.position, -1);
+                }
+                else
+                {
+                    SpawnEnemy(chicken, bothSpawn.position, 1);
+                }
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        GameStateScript.Instance.canSpawnMid = true;
+    }
+
+    IEnumerator SpawnAir(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        int rnd1 = Random.Range(0, airSpawns.Length);
+
+        SpawnAirEnemy(corn, airSpawns[rnd1].position, 1);
+
+        yield return new WaitForSeconds(1f);
+
+        int rnd2 = Random.Range(0, airSpawns.Length);
+
+        SpawnAirEnemy(meatball, airSpawns[rnd2].position, 1);
+
+        yield return new WaitForSeconds(1f);
+
+        GameStateScript.Instance.canSpawnAir = true;
     }
 
     //Supplement function for auto spawning enemies
@@ -49,40 +235,20 @@ public class EnemySpawn : MonoBehaviour
     public void AutoSpawn()
     {
         //Determine the spawn position randomly
-        int rnd = Random.Range(0, 79);
-        Transform spawnPosition = gameObject.transform;
-        if (rnd < 10)
+        while (true)
         {
-            spawnPosition = spawns[0];
+            int rnd = Random.Range(0, spawns.Length);
+
+            //Avoid repeating position
+            if (rnd != currentSpawnIndex)
+            {
+                currentSpawnIndex = rnd;
+                break;
+            }
         }
-        else if (rnd < 20)
-        {
-            spawnPosition = spawns[1];
-        }
-        else if (rnd < 30)
-        {
-            spawnPosition = spawns[2];
-        }
-        else if (rnd < 40)
-        {
-            spawnPosition = spawns[3];
-        }
-        else if (rnd < 50)
-        {
-            spawnPosition = spawns[4];
-        }
-        else if (rnd < 60)
-        {
-            spawnPosition = spawns[5];
-        }
-        else if (rnd < 70)
-        {
-            spawnPosition = spawns[6];
-        }
-        else if (rnd < 80)
-        {
-            spawnPosition = spawns[7];
-        }
+
+        Transform spawnPosition = spawns[currentSpawnIndex];
+
         SpawnTest(spawnPosition);
     }
 
@@ -106,6 +272,11 @@ public class EnemySpawn : MonoBehaviour
         }
 
         isSpawning = false;
+    }
+
+    public void StopSpawning()
+    {
+        StopAllCoroutines();
     }
 
     public void ChangeLevel()

@@ -9,11 +9,9 @@ public class PlayerControl : MonoBehaviour
     //References
     private Rigidbody2D rgbd;
     private Animator anim;
-    public GameObject dieEffect;
 
     //Bool checks
     public bool isGrounded;
-    private bool isAttacking;
     private bool isMoving; //When the move button is being held
     private bool isJumping; //When the jump button is being held
     private float moveDirection; //Move direction updated by input direction (up, down, left, right)
@@ -21,12 +19,13 @@ public class PlayerControl : MonoBehaviour
     //Special bool checks for slamming with cutting board
     public bool isSlaming = false;
     public bool isRecovering = false;
+    public bool slamShakeOnce = false;
 
     //Flip - x of move direction
     public float flip = 1; //1 is not flip, -1 is flip
 
     //General stats
-    private float jumpSpeed = 22f;
+    private float jumpSpeed = 25f;
     public float moveSpeed = 10f; //Base speed. Characters may change this
 
     //Currently active
@@ -37,6 +36,11 @@ public class PlayerControl : MonoBehaviour
         //References
         rgbd = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+    }
+
+    private void Start()
+    {
+        ControlsManager.Instance.currentLayer = gameObject.layer;
     }
 
     public void BasicModeOn()
@@ -61,7 +65,7 @@ public class PlayerControl : MonoBehaviour
         anim.SetBool("isMoving", isMoving);
         anim.SetFloat("VelocityY", rgbd.velocity.y);
         anim.SetBool("isGrounded", isGrounded);
-        anim.SetBool("isAttacking", isAttacking);
+        anim.SetBool("isAttacking", ControlsManager.Instance.isAttacking);
     }
 
     private void FixedUpdate()
@@ -90,6 +94,7 @@ public class PlayerControl : MonoBehaviour
                 //Jump if the Jump button is held and the character is grounded
                 if (isJumping && isGrounded)
                 {
+                    JumpEffect();
                     rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
                     rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
                 }
@@ -105,11 +110,17 @@ public class PlayerControl : MonoBehaviour
                     else
                     {
                         rgbd.velocity = new Vector2(moveDirection * moveSpeed, 0);
+                        if (!slamShakeOnce)
+                        {
+                            Debug.Log("SLAM");
+                            CameraShake.Instance.ShakeCamera();
+                            slamShakeOnce = true;
+                        }
                     }
                 }
                 else
                 {
-                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -25f);
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -30f);
                 }
             }
         }
@@ -163,16 +174,10 @@ public class PlayerControl : MonoBehaviour
     //When the Attack button is pressed
     public void Attack()
     {
-        if (!isAttacking)
+        if (!ControlsManager.Instance.isAttacking)
         {
-            isAttacking = true;
+            ControlsManager.Instance.isAttacking = true;
         }
-    }
-
-    //When the attack ends - is called at the end of attack animation
-    public void EndAttack()
-    {
-        isAttacking = false;
     }
 
     public void TapTest(Vector2 position)
@@ -209,7 +214,11 @@ public class PlayerControl : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == Layer.Enemy)
+        if (collision.gameObject.layer == Layer.Enemy_Veg && gameObject.layer == Layer.Player_Meat)
+        {
+            Die();
+        }
+        if (collision.gameObject.layer == Layer.Enemy_Meat && gameObject.layer == Layer.Player_Veg)
         {
             Die();
         }
@@ -217,10 +226,24 @@ public class PlayerControl : MonoBehaviour
 
     private void Die()
     {
-        //Spawn the particle effect
-        GameObject particle = Instantiate(dieEffect, gameObject.transform.position, dieEffect.transform.rotation);
-        Destroy(particle, 3.0f);
+        //Spawn the effect game object
+        GameObject effect = Instantiate(EffectReferences.Instance.playerDie, gameObject.transform.position, EffectReferences.Instance.playerDie.transform.rotation);
+        Destroy(effect, 3.0f);
+
+        GameStateScript.Instance.EndScreen();
 
         gameObject.SetActive(false);
+    }
+
+    private void JumpEffect()
+    {
+        GameObject effect = Instantiate(EffectReferences.Instance.playerJump, gameObject.transform.GetChild(1).position - new Vector3(0, 1, 0), EffectReferences.Instance.playerJump.transform.rotation);
+        Destroy(effect, 3.0f);
+    }
+
+    public void ChangeSide()
+    {
+        gameObject.layer = gameObject.layer == Layer.Player_Veg ? Layer.Player_Meat : Layer.Player_Veg;
+        ControlsManager.Instance.currentLayer = gameObject.layer;
     }
 }

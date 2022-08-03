@@ -11,7 +11,6 @@ public class InputManager : MonoBehaviour
 
     private PlayerInputActions playerInputActions;
     private Camera mainCamera;
-    public RectTransform rect; //Currently unused
 
     //Swipe
     public delegate void StartTouch(Vector2 position, float time);
@@ -59,7 +58,7 @@ public class InputManager : MonoBehaviour
 
     private void OnDisable()
     {
-        //playerInputActions.Disable();
+        playerInputActions.Disable();
     }
 
     private void Start()
@@ -167,16 +166,6 @@ public class InputManager : MonoBehaviour
         {
             OnJump(context.ReadValueAsButton());
         }
-    }
-
-    //Supplement function - Currently unused
-    public Vector2 ScreenToRect(Vector2 position)
-    {
-        Vector2 newPos = Vector2.zero;
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, position, mainCamera, out newPos);
-
-        return newPos;
     }
 
     //Reset function

@@ -7,6 +7,7 @@ public class ToasterScript : MonoBehaviour
     //Projectile start positions
     public GameObject toastPos;
     private Transform[] shootPos;
+
     private PlayerControl playerControl;
 
     //Projectile prefabs

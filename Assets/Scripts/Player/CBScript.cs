@@ -14,13 +14,22 @@ public class CBScript : MonoBehaviour
         playerControl.moveSpeed = 15;
     }
 
+    private void SlamWindUp()
+    {
+        if (playerControl.isCurrent)
+        {
+            gameObject.layer = Layer.Invincible;
+            playerControl.GetComponent<Rigidbody2D>().constraints |= RigidbodyConstraints2D.FreezePositionY;
+        }
+    }
+
     private void Slam()
     {
         if (playerControl.isCurrent)
         {
             hitBoxSlam.SetActive(true);
             playerControl.isSlaming = true;
-            gameObject.layer = Layer.Invincible;
+            playerControl.GetComponent<Rigidbody2D>().constraints &= ~RigidbodyConstraints2D.FreezePositionY;
         }
     }
 
@@ -30,10 +39,11 @@ public class CBScript : MonoBehaviour
         playerControl.isRecovering = true;
     }
 
-    private void SlamEnd()
+    public void SlamEnd()
     {
         playerControl.isSlaming = false;
-        gameObject.layer = Layer.Player;
+        gameObject.layer = ControlsManager.Instance.currentLayer;
         playerControl.isRecovering = false;
+        playerControl.slamShakeOnce = false;
     }
 }

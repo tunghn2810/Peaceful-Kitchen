@@ -23,6 +23,9 @@ public class ControlsManager : MonoBehaviour
     private Vector3 lastPos;
     private Vector3 lastVel;
 
+    public int currentLayer;
+    public bool isAttacking;
+
     private void Awake()
     {
         //Singleton
@@ -40,19 +43,23 @@ public class ControlsManager : MonoBehaviour
         ControlInit();
         
         //Testing only
-        BasicControl();
+        //BasicControl();
     }
 
     private void PlayerInit()
     {
         playerCharacters = GameObject.FindGameObjectsWithTag("Player");
-        currentCharacterIndex = 0;
+        
+        currentCharacterIndex = Random.Range(0, playerCharacters.Length);
+        
         currentCharacter = playerCharacters[currentCharacterIndex];
 
-        for (int i = 1; i < playerCharacters.Length; i++)
+        for (int i = 0; i < playerCharacters.Length; i++)
         {
-            //playerCharacters[i].SetActive(false);
-            TempDisable(playerCharacters[i]);
+            if (i != currentCharacterIndex)
+            {
+                TempDisable(playerCharacters[i]);
+            }
         }
 
         currentCharacter.transform.position = startPos.position;
@@ -116,10 +123,18 @@ public class ControlsManager : MonoBehaviour
         TempDisable(currentCharacter); //Disable current character
         currentCharacter = playerCharacters[currentCharacterIndex]; //Set next character
         TempEnable(currentCharacter); //Enable next character
+
         currentCharacter.transform.position = lastPos; //Bring last position to the new one
         currentCharacter.GetComponent<Rigidbody2D>().velocity = lastVel; //Bring last velocity to the new one
 
+        //Change side for all the player controls
+        for (int i = 0; i < playerCharacters.Length; i++)
+        {
+            playerControls[i].ChangeSide();
+        }
+
         CameraScript.Instance.target = currentCharacter.transform; //Set camera to point at the new one
+        CameraScript.Instance.ChangeTarget();
     }
 
     //Temporarily disable some components of the inactive characters
@@ -136,11 +151,26 @@ public class ControlsManager : MonoBehaviour
     //Temporarily enable components the character being transformed into
     private void TempEnable(GameObject character)
     {
-        for (int i = 0; i < character.transform.childCount; i++)
+        for (int i = 0; i < character.transform.childCount - 1; i++)
         {
             character.transform.GetChild(i).gameObject.SetActive(true);
         }
         character.GetComponent<Rigidbody2D>().simulated = true;
         character.GetComponent<PlayerControl>().isCurrent = true;
+    }
+
+    //When the attack ends - is called at the end of attack animation
+    public void EndAttack()
+    {
+        isAttacking = false;
+        
+        if (currentCharacter.GetComponent<PotScript>() != null)
+        {
+            currentCharacter.GetComponent<PotScript>().BonkEnd();
+        }
+        else if (currentCharacter.GetComponent<CBScript>() != null)
+        {
+            currentCharacter.GetComponent<CBScript>().SlamEnd();
+        }
     }
 }

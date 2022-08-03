@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FridgeScript : MonoBehaviour
 {
-    public GameObject dieEffect;
     private Animator anim;
 
     private float health = 30f;
@@ -23,11 +22,15 @@ public class FridgeScript : MonoBehaviour
         else
         {
             CameraScript.Instance.target = gameObject.transform;
+            CameraScript.Instance.ChangeTarget();
             ControlsManager.Instance.currentCharacter.SetActive(false);
 
             //Spawn the particle effect
-            GameObject particle = Instantiate(dieEffect, gameObject.transform.position, dieEffect.transform.rotation);
+            GameObject particle = Instantiate(EffectReferences.Instance.fridgeExplode, gameObject.transform.position, EffectReferences.Instance.fridgeExplode.transform.rotation);
             Destroy(particle, 3.0f);
+
+            //End screen
+            GameStateScript.Instance.EndScreen();
 
             anim.SetBool("isBroken", true);
         }

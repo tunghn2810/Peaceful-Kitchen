@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class CameraScript : MonoBehaviour
 {
@@ -9,9 +10,7 @@ public class CameraScript : MonoBehaviour
 
     //References
     public Transform target;
-    private Vector3 offset;
-
-    public float smoothSpeed = 0.01f;
+    private CinemachineVirtualCamera cinemachine;
 
     private void Awake()
     {
@@ -29,25 +28,15 @@ public class CameraScript : MonoBehaviour
 
     private void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-        offset = new Vector3(0, 5.0f, 0);
+        target = ControlsManager.Instance.currentCharacter.transform;
+        cinemachine = GetComponent<CinemachineVirtualCamera>();
+
+        ChangeTarget();
     }
 
-    private void LateUpdate()
+    public void ChangeTarget()
     {
-        SmoothFollow();
-    }
-
-    //Smoothly follow the player
-    private void SmoothFollow()
-    {
-        if (target != null)
-        {
-            Vector3 targetPos = target.position + offset;
-
-            //Vector3 smoothFollow = Vector3.Lerp(transform.position, targetPos, smoothSpeed);
-            //transform.position = smoothFollow;
-            transform.position = targetPos;
-        }
+        cinemachine.LookAt = target;
+        cinemachine.Follow = target;
     }
 }
