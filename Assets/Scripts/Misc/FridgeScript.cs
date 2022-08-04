@@ -29,6 +29,9 @@ public class FridgeScript : MonoBehaviour
             GameObject particle = Instantiate(EffectReferences.Instance.fridgeExplode, gameObject.transform.position, EffectReferences.Instance.fridgeExplode.transform.rotation);
             Destroy(particle, 3.0f);
 
+            //No more collision
+            gameObject.layer = Layer.NoCol;
+
             //End screen
             GameStateScript.Instance.EndScreen();
 

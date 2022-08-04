@@ -28,6 +28,7 @@ public class EffectReferences : MonoBehaviour
 
     //Effects - Fridge
     public GameObject fridgeExplode;
+    public GameObject[] fridgeHitEffects;
 
     //Effects - Weapons
     public GameObject[] hitEffects;

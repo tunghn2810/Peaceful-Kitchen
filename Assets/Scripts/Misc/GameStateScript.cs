@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameStateScript : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class GameStateScript : MonoBehaviour
 
     //Menu canvas
     public GameObject menuCanvas;
+    public GameObject menuButtons;
 
     //Tutorial canvas
     public GameObject tutorialCanvas;
@@ -32,9 +34,17 @@ public class GameStateScript : MonoBehaviour
     //Settings screen canvas
     public GameObject settingsCanvas;
 
+    //Tutorial toggle
+    public GameObject tutorialToggle;
+    public Sprite emptyBox;
+    public Sprite tickBox;
+
     //Number to keep track of what screen to show next
     //0 = Menu, 1 = Tutorial, 2 = Gameplay, 3 = End Screen, 4 = Pause screen
     private int nextScreen = 0;
+    public bool startGame = false;
+    private bool firstTime = true;
+    private bool showTutorial = true;
 
     public bool canSpawnTier1_1 = true;
     public bool canSpawnTier1_2 = true;
@@ -66,15 +76,28 @@ public class GameStateScript : MonoBehaviour
 
     private void Update()
     {
-        if (nextScreen == 2)
+        if (startGame)
         {
             if (canSpawnTier1_1 && canSpawnTier1_2)
             {
-                float rnd1 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                EnemySpawn.Instance.Tier1(0, rnd1);
+                if (firstTime) //First spawn is 5 seconds sooner than subsequent spawns
+                {
+                    float rnd1 = Random.Range(NORMAL_MIN_TIME - 5, NORMAL_MAX_TIME - 5);
+                    EnemySpawn.Instance.Tier1(0, rnd1);
 
-                float rnd2 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                EnemySpawn.Instance.Tier1(1, rnd2);
+                    float rnd2 = Random.Range(NORMAL_MIN_TIME - 5, NORMAL_MAX_TIME - 5);
+                    EnemySpawn.Instance.Tier1(1, rnd2);
+
+                    firstTime = false;
+                }
+                else
+                {
+                    float rnd1 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
+                    EnemySpawn.Instance.Tier1(0, rnd1);
+
+                    float rnd2 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
+                    EnemySpawn.Instance.Tier1(1, rnd2);
+                }
 
                 canSpawnTier1_1 = false;
                 canSpawnTier1_2 = false;
@@ -95,12 +118,16 @@ public class GameStateScript : MonoBehaviour
             {
                 float rnd = Random.Range(MID_MIN_TIME, MID_MAX_TIME);
                 EnemySpawn.Instance.Mid(rnd);
+
+                canSpawnMid = false;
             }
 
             if (canSpawnAir)
             {
                 float rnd = Random.Range(AIR_MIN_TIME, AIR_MAX_TIME);
                 EnemySpawn.Instance.Mid(rnd);
+
+                canSpawnAir = false;
             }
         }
     }
@@ -126,6 +153,10 @@ public class GameStateScript : MonoBehaviour
         {
             yield return Tutorial();
         }
+        else if (nextScreen == 2)
+        {
+            yield return Gameplay();
+        }
     }
 
     public IEnumerator HomeMenu()
@@ -133,6 +164,9 @@ public class GameStateScript : MonoBehaviour
         //Fade into the home menu
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
+
+        blackOverlayAnim.SetBool("isFadeIn", true);
+        blackOverlayAnim.SetBool("isFadeOut", false);
 
         menuCanvas.SetActive(true);
 
@@ -142,21 +176,22 @@ public class GameStateScript : MonoBehaviour
         endCanvas.SetActive(false);
         pauseCanvas.SetActive(false);
 
-        blackOverlayAnim.SetBool("isFadeIn", true);
-        blackOverlayAnim.SetBool("isFadeOut", false);
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
 
-        Replay();
+        ResetGame();
 
         yield return null;
     }
 
     public IEnumerator Tutorial()
     {
-        //Fade into gameplay/tutorial
+        //Fade into tutorial
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
+
+        blackOverlayAnim.SetBool("isFadeIn", true);
+        blackOverlayAnim.SetBool("isFadeOut", false);
 
         gameplayCanvas.SetActive(true);
         tutorialCanvas.SetActive(true);
@@ -164,10 +199,34 @@ public class GameStateScript : MonoBehaviour
         loadingToaster.SetActive(false);
         menuCanvas.SetActive(false);
 
-        blackOverlayAnim.SetBool("isFadeIn", true);
-        blackOverlayAnim.SetBool("isFadeOut", false);
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
+
+        yield return null;
+    }
+
+    public IEnumerator Gameplay()
+    {
+        //Fade into gameplay
+        blackOverlayAnim.SetBool("isFadeOut", true);
+        yield return new WaitForSeconds(1.0f);
+
+        blackOverlayAnim.SetBool("isFadeIn", true);
+        blackOverlayAnim.SetBool("isFadeOut", false);
+
+        gameplayCanvas.SetActive(true);
+        controlCanvas.SetActive(true);
+
+        tutorialCanvas.SetActive(false);
+        loadingToaster.SetActive(false);
+        menuCanvas.SetActive(false);
+
+        yield return new WaitForSeconds(1.0f);
+        blackOverlayAnim.SetBool("isFadeIn", false);
+
+        ControlsManager.Instance.BasicControl();
+        startGame = true;
+        firstTime = true;
 
         yield return null;
     }
@@ -179,13 +238,22 @@ public class GameStateScript : MonoBehaviour
         controlCanvas.SetActive(false);
         endCanvas.SetActive(true);
 
+        EnemySpawn.Instance.StopSpawning();
+
         yield return null;
     }
 
     //When the play button is pressed
     public void PlayButton()
     {
-        nextScreen = 1;
+        if (showTutorial)
+        {
+            nextScreen = 1;
+        }
+        else
+        {
+            nextScreen = 2;
+        }
         StartCoroutine(Loading());
     }
 
@@ -193,6 +261,7 @@ public class GameStateScript : MonoBehaviour
     public void CloseTutorial()
     {
         nextScreen = 2;
+        startGame = true;
         tutorialAnim.SetBool("isClose", true);
     }
 
@@ -200,6 +269,7 @@ public class GameStateScript : MonoBehaviour
     public void EndScreen()
     {
         nextScreen = 3;
+        startGame = false;
         StartCoroutine(GameOver());
     }
 
@@ -207,6 +277,7 @@ public class GameStateScript : MonoBehaviour
     public void PauseButton()
     {
         nextScreen = 4;
+        startGame = false;
         controlCanvas.SetActive(false);
         pauseCanvas.SetActive(true);
         Time.timeScale = 0;
@@ -216,6 +287,7 @@ public class GameStateScript : MonoBehaviour
     public void ResumeGame()
     {
         nextScreen = 2;
+        startGame = true;
         controlCanvas.SetActive(true);
         pauseCanvas.SetActive(false);
         Time.timeScale = 1;
@@ -226,11 +298,22 @@ public class GameStateScript : MonoBehaviour
     {
         Time.timeScale = 1;
         nextScreen = 0;
+        startGame = false;
         StartCoroutine(Loading());
     }
 
     //When the player presses the Replay button
     public void Replay()
+    {
+        ResetGame();
+
+        controlCanvas.SetActive(true);
+        ControlsManager.Instance.BasicControl();
+        startGame = true;
+        firstTime = true;
+    }
+
+    private void ResetGame()
     {
         RestartScript.Instance.RestartPlayer();
         RestartScript.Instance.RestartEnemies();
@@ -238,21 +321,50 @@ public class GameStateScript : MonoBehaviour
         RestartScript.Instance.RestartFridge();
 
         endCanvas.SetActive(false);
-        
-        nextScreen = 2;
+
         canSpawnTier1_1 = true;
         canSpawnTier1_2 = true;
-    }
+        canSpawnTier2_1 = false;
+        canSpawnTier2_2 = false;
+        canSpawnMid = false;
+        canSpawnAir = false;
+}
 
     //When the player presses the Settings button
     public void SettingsButton()
     {
         settingsCanvas.SetActive(true);
+
+        if (nextScreen == 0)
+        {
+            menuButtons.SetActive(false);
+        }
     }
 
+    //When the player closes the Settings menu
     public void CloseSettings()
     {
         settingsCanvas.SetActive(false);
+
+        if (nextScreen == 0)
+        {
+            menuButtons.SetActive(true);
+        }
+    }
+
+    //When the player clicks on the toggle to show/hide the tutorial
+    public void TutorialToggle()
+    {
+        showTutorial = !showTutorial;
+
+        if (showTutorial)
+        {
+            tutorialToggle.GetComponent<Image>().sprite = tickBox;
+        }
+        else
+        {
+            tutorialToggle.GetComponent<Image>().sprite = emptyBox;
+        }
     }
 
     //Quit the game

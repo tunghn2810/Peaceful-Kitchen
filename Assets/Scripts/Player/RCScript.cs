@@ -19,9 +19,23 @@ public class RCScript : MonoBehaviour
 
     private void SpawnRice()
     {
-        if (GetComponentInParent<PlayerControl>().isCurrent)
+        if (playerControl.isCurrent)
         {
             GameObject newRice = Instantiate(rice, ricePos.position, Quaternion.identity);
         }
+    }
+
+    private void CookRice()
+    {
+        if (playerControl.isCurrent)
+        {
+            playerControl.isCooking = true;
+            SpawnRice();
+        }
+    }
+
+    public void CookRiceEnd()
+    {
+        playerControl.isCooking = false;
     }
 }

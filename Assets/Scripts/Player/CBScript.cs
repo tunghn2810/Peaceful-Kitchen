@@ -5,11 +5,13 @@ using UnityEngine;
 public class CBScript : MonoBehaviour
 {
     private GameObject hitBoxSlam;
+    private GameObject hitBoxShock;
     private PlayerControl playerControl;
 
     private void Awake()
     {
         hitBoxSlam = transform.GetChild(2).gameObject;
+        hitBoxShock = transform.GetChild(3).gameObject;
         playerControl = GetComponent<PlayerControl>();
         playerControl.moveSpeed = 15;
     }
@@ -30,6 +32,8 @@ public class CBScript : MonoBehaviour
             hitBoxSlam.SetActive(true);
             playerControl.isSlaming = true;
             playerControl.GetComponent<Rigidbody2D>().constraints &= ~RigidbodyConstraints2D.FreezePositionY;
+
+            hitBoxShock.SetActive(true);
         }
     }
 
@@ -45,5 +49,7 @@ public class CBScript : MonoBehaviour
         gameObject.layer = ControlsManager.Instance.currentLayer;
         playerControl.isRecovering = false;
         playerControl.slamShakeOnce = false;
+
+        hitBoxShock.SetActive(false);
     }
 }

@@ -163,27 +163,29 @@ public class EnemySpawn : MonoBehaviour
         {
             int rndTier = Random.Range(0, 100);
             int rndType = Random.Range(0, 100);
+            int shouldFlip = Random.Range(0, 100);
+            int rndFlip = shouldFlip < 50 ? 1: -1;
 
             if (rndTier < 70)
             {
                 if (rndType < 50)
                 {
-                    SpawnEnemy(bean, bothSpawn.position, -1);
+                    SpawnEnemy(bean, bothSpawn.position, rndFlip);
                 }
                 else
                 {
-                    SpawnEnemy(hotdog, bothSpawn.position, 1);
+                    SpawnEnemy(hotdog, bothSpawn.position, rndFlip);
                 }
             }
             else
             {
                 if (rndType < 50)
                 {
-                    SpawnEnemy(eggplant, bothSpawn.position, -1);
+                    SpawnEnemy(eggplant, bothSpawn.position, rndFlip);
                 }
                 else
                 {
-                    SpawnEnemy(chicken, bothSpawn.position, 1);
+                    SpawnEnemy(chicken, bothSpawn.position, rndFlip);
                 }
             }
 

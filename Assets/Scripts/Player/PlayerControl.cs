@@ -9,6 +9,7 @@ public class PlayerControl : MonoBehaviour
     //References
     private Rigidbody2D rgbd;
     private Animator anim;
+    public WeaponScript[] weapons; //Only for pot and rice cooker
 
     //Bool checks
     public bool isGrounded;
@@ -20,6 +21,9 @@ public class PlayerControl : MonoBehaviour
     public bool isSlaming = false;
     public bool isRecovering = false;
     public bool slamShakeOnce = false;
+
+    //Special bool checks for rice cooker
+    public bool isCooking = false;
 
     //Flip - x of move direction
     public float flip = 1; //1 is not flip, -1 is flip
@@ -36,6 +40,15 @@ public class PlayerControl : MonoBehaviour
         //References
         rgbd = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        
+        weapons = GetComponentsInChildren<WeaponScript>();
+        if (weapons.Length > 0)
+        {
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                weapons[i].gameObject.SetActive(false);
+            }
+        }
     }
 
     private void Start()
@@ -79,7 +92,34 @@ public class PlayerControl : MonoBehaviour
         //For Basic control & Dpad control
         if (ControlsManager.Instance.currentMode == 1)
         {
-            if (!isSlaming)
+            if (isSlaming) //Only happens when slamming
+            {
+                if (isGrounded)
+                {
+                    if (isRecovering)
+                    {
+                        rgbd.velocity = new Vector2(0, 0);
+                    }
+                    else
+                    {
+                        rgbd.velocity = new Vector2(moveDirection * moveSpeed, 0);
+                        if (!slamShakeOnce)
+                        {
+                            CameraShake.Instance.ShakeCamera();
+                            slamShakeOnce = true;
+                        }
+                    }
+                }
+                else
+                {
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -30f);
+                }
+            }
+            else if (isCooking)
+            {
+                rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            }
+            else
             {
                 //Update velocity every frame
                 if (isMoving)
@@ -97,30 +137,6 @@ public class PlayerControl : MonoBehaviour
                     JumpEffect();
                     rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
                     rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
-                }
-            }
-            else //Only happens when slamming
-            {
-                if (isGrounded)
-                {
-                    if (isRecovering)
-                    {
-                        rgbd.velocity = new Vector2(0, 0);
-                    }
-                    else
-                    {
-                        rgbd.velocity = new Vector2(moveDirection * moveSpeed, 0);
-                        if (!slamShakeOnce)
-                        {
-                            Debug.Log("SLAM");
-                            CameraShake.Instance.ShakeCamera();
-                            slamShakeOnce = true;
-                        }
-                    }
-                }
-                else
-                {
-                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -30f);
                 }
             }
         }
@@ -177,6 +193,14 @@ public class PlayerControl : MonoBehaviour
         if (!ControlsManager.Instance.isAttacking)
         {
             ControlsManager.Instance.isAttacking = true;
+
+            if (ControlsManager.Instance.currentCharacter.GetComponent<PlayerControl>().weapons.Length > 0)
+            {
+                for (int i = 0; i < ControlsManager.Instance.currentCharacter.GetComponent<PlayerControl>().weapons.Length; i++)
+                {
+                    ControlsManager.Instance.currentCharacter.GetComponent<PlayerControl>().weapons[i].ChangeLayer();
+                }
+            }
         }
     }
 
@@ -245,5 +269,10 @@ public class PlayerControl : MonoBehaviour
     {
         gameObject.layer = gameObject.layer == Layer.Player_Veg ? Layer.Player_Meat : Layer.Player_Veg;
         ControlsManager.Instance.currentLayer = gameObject.layer;
+
+        isSlaming = false;
+        isRecovering = false;
+        slamShakeOnce = false;
+        isCooking = false;
     }
 }

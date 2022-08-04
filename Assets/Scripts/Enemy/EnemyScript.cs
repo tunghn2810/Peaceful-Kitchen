@@ -12,12 +12,14 @@ public class EnemyScript : MonoBehaviour
     private float moveSpeed = 5f;
     private float currVelocity;
     private float flip;
-    private float health = 30f;
+    [SerializeField] private float health = 30f;
 
     //Bool checks
     private bool isDead = false;
     private bool isJump = false;
     private float jumpSpeed = 105f;
+
+    private int hitCols;
 
     private void Awake()
     {
@@ -35,14 +37,21 @@ public class EnemyScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isDead)
+        if (GameStateScript.Instance.startGame)
         {
-            rgbd.velocity = new Vector2(currVelocity, rgbd.velocity.y);
+            if (!isDead)
+            {
+                rgbd.velocity = new Vector2(currVelocity, rgbd.velocity.y);
+            }
+            else
+            {
+                //Stop moving horizontally when it dies
+                rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            }
         }
         else
         {
-            //Stop moving horizontally when it dies
-            rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            rgbd.velocity = new Vector2(0, 0);
         }
 
         //Jump when prompted to
@@ -60,7 +69,7 @@ public class EnemyScript : MonoBehaviour
 
     private void Explode()
     {
-        Instantiate(EffectReferences.Instance.enemyDie, gameObject.transform.position, Quaternion.identity);
+        //Instantiate(EffectReferences.Instance.enemyDie, gameObject.transform.position, Quaternion.identity);
         isDead = true;
         anim.SetBool("isDead", isDead);
         gameObject.layer = Layer.NoCol;
@@ -68,30 +77,33 @@ public class EnemyScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
+        if (hitCols <= 0)
         {
-            if (collision.gameObject.tag == "Toast")
+            if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
             {
-                collision.gameObject.GetComponent<ToastScript>().Die();
-            }
+                if (collision.gameObject.tag == "Toast")
+                {
+                    collision.gameObject.GetComponent<ToastScript>().Die();
+                }
 
-            if (collision.gameObject.tag == "RiceBall")
-            {
-                collision.gameObject.GetComponent<RiceScript>().Explode();
-            }
+                if (collision.gameObject.tag == "RiceBall")
+                {
+                    collision.gameObject.GetComponent<RiceScript>().Explode();
+                }
 
-            if (health > 0)
-            {
                 health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
-            }
-            else
-            {
-                Explode();
-            }
 
-            int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
-            GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
-            Destroy(hitEffect, 1.0f);
+                if (health <= 0)
+                {
+                    Explode();
+                }
+
+                hitCols++;
+
+                int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
+                GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
+                Destroy(hitEffect, 1.0f);
+            }
         }
 
         if (collision.gameObject.layer == Layer.Platform)
@@ -105,22 +117,33 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
         {
-            if (health > 0)
+            hitCols--;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (hitCols <= 0)
+        {
+            if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
             {
                 health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
-            }
-            else
-            {
-                Explode();
-            }
 
-            int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
-            GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
-            Destroy(hitEffect, 1.0f);
+                if (health <= 0)
+                {
+                    Explode();
+                }
+
+                hitCols++;
+
+                int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
+                GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
+                Destroy(hitEffect, 1.0f);
+            }
         }
 
         if (collision.gameObject.layer == Layer.JumpPad)
@@ -139,7 +162,22 @@ public class EnemyScript : MonoBehaviour
                 GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().TakeDamage();
             }
 
+            int rndEffect = Random.Range(0, EffectReferences.Instance.fridgeHitEffects.Length);
+            GameObject fridgeHitEffect = Instantiate(EffectReferences.Instance.fridgeHitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.fridgeHitEffects[rndEffect].transform.rotation);
+            Destroy(fridgeHitEffect, 1.0f);
+
             Explode();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (hitCols > 0)
+        {
+            if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
+            {
+                hitCols--;
+            }
         }
     }
 }

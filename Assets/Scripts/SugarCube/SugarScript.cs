@@ -16,6 +16,9 @@ public class SugarScript : MonoBehaviour
             //Transform the player
             ControlsManager.Instance.Transformation();
 
+            //Reset variables
+            
+
             //Switch control - Currently not needed
             ControlsManager.Instance.ControlInit();
 

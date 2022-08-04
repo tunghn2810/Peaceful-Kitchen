@@ -42,35 +42,37 @@ public class EnemyFlyingScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isDead)
+        if (GameStateScript.Instance.startGame)
         {
-            //rgbd.velocity = new Vector2(currVelocity, rgbd.velocity.y);
+            if (!isDead)
+            {
+                Vector3 directionToPlayer = ControlsManager.Instance.currentCharacter.transform.position - gameObject.transform.position;
+
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, directionToPlayer, directionToPlayer.magnitude, layerMask);
+                if (hit.collider != null)
+                {
+                    if (hit.collider.gameObject.layer == Layer.Player_Veg || hit.collider.gameObject.layer == Layer.Player_Meat)
+                    {
+                        directionToMove = directionToPlayer.normalized;
+
+                        int toFlip = directionToMove.x > 0 ? 1 : -1;
+                        transform.localScale = new Vector3(transform.localScale.x * Flip(toFlip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
+
+                        rgbd.velocity = directionToMove * moveSpeed;
+                        currVelocity = rgbd.velocity;
+                    }
+                }
+            }
+            else
+            {
+                //Stop moving when it dies
+                rgbd.velocity = new Vector2(0, 0);
+            }
         }
         else
         {
-            //Stop moving when it dies
             rgbd.velocity = new Vector2(0, 0);
         }
-
-        Vector3 directionToPlayer = ControlsManager.Instance.currentCharacter.transform.position - gameObject.transform.position;
-
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, directionToPlayer, directionToPlayer.magnitude, layerMask);
-        if (hit.collider != null)
-        {
-            if (hit.collider.gameObject.layer == Layer.Player_Veg || hit.collider.gameObject.layer == Layer.Player_Meat)
-            {
-                directionToMove = directionToPlayer.normalized;
-
-                int toFlip = directionToMove.x > 0 ? 1 : -1;
-                transform.localScale = new Vector3(transform.localScale.x * Flip(toFlip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
-
-                rgbd.velocity = directionToMove * moveSpeed;
-                currVelocity = rgbd.velocity;
-            }
-        }
-
-        Debug.DrawLine(gameObject.transform.position, gameObject.transform.position + directionToPlayer, Color.red, 1);
-        Debug.DrawLine(gameObject.transform.position, gameObject.transform.position + new Vector3(rgbd.velocity.x, rgbd.velocity.y, 0), Color.green, 1);
     }
 
     private void Die()
@@ -112,11 +114,9 @@ public class EnemyFlyingScript : MonoBehaviour
                 collision.gameObject.GetComponent<RiceScript>().Explode();
             }
 
-            if (health > 0)
-            {
-                health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
-            }
-            else
+            health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
+
+            if (health <= 0)
             {
                 Explode();
             }
@@ -147,11 +147,9 @@ public class EnemyFlyingScript : MonoBehaviour
     {
         if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
         {
-            if (health > 0)
-            {
-                health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
-            }
-            else
+            health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
+
+            if (health <= 0)
             {
                 Explode();
             }

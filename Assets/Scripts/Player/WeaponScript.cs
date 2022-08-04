@@ -6,7 +6,7 @@ public class WeaponScript : MonoBehaviour
 {
     private string type;
 
-    private void Awake()
+    private void Start()
     {
         type = gameObject.tag;
         ChangeLayer();
@@ -24,17 +24,17 @@ public class WeaponScript : MonoBehaviour
         }
         else if (type == "Board")
         {
-            return 30f;
+            return 100f;
         }
         else if (type == "RiceBall")
         {
-            return 30f;
+            return 100f;
         }
         //ADD NEW WEAPON HERE
         return 0; //Never happens
     }
 
-    private void ChangeLayer()
+    public void ChangeLayer()
     {
         if (ControlsManager.Instance.currentLayer == Layer.Player_Veg)
         {

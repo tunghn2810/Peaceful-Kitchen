@@ -24,11 +24,12 @@ public class RestartScript : MonoBehaviour
 
     public void RestartScore()
     {
-        ScoreScript.Instance.score = 0;
+        ScoreScript.Instance.ResetScore();
     }
 
     public void RestartPlayer()
     {
+        ControlsManager.Instance.EndAttack();
         ControlsManager.Instance.currentCharacter.SetActive(true);
         ControlsManager.Instance.currentCharacter.transform.position = defaultSpawn.position;
         CameraScript.Instance.target = ControlsManager.Instance.currentCharacter.transform;
@@ -61,5 +62,6 @@ public class RestartScript : MonoBehaviour
     public void RestartFridge()
     {
         GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().RestartFridge();
+        GameObject.FindGameObjectWithTag("MeatFridge").GetComponent<FridgeScript>().RestartFridge();
     }
 }

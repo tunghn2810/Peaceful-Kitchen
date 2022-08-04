@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95338f90f5d8b524890afbbb1f36ee11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dieParticle: {fileID: 7854290779110019288, guid: ed203dda1f8c21d42af27d79de30453d, type: 3}
+  health: 60
 --- !u!70 &8514393661113358340
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

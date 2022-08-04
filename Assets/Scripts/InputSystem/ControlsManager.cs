@@ -8,8 +8,8 @@ public class ControlsManager : MonoBehaviour
     public static ControlsManager Instance { get; set; }
 
     //Lists of control scripts for all characters
-    List<SwipeDetection> swipeDetections = new List<SwipeDetection>();
-    List<PlayerControl> playerControls = new List<PlayerControl>();
+    private List<SwipeDetection> swipeDetections = new List<SwipeDetection>();
+    private List<PlayerControl> playerControls = new List<PlayerControl>();
 
     //For switching controls
     public int currentMode = -1; //0 is Swipe, 1 is Basic, 2 is Dpad
@@ -171,6 +171,10 @@ public class ControlsManager : MonoBehaviour
         else if (currentCharacter.GetComponent<CBScript>() != null)
         {
             currentCharacter.GetComponent<CBScript>().SlamEnd();
+        }
+        else if (currentCharacter.GetComponent<RCScript>() != null)
+        {
+            currentCharacter.GetComponent<RCScript>().CookRiceEnd();
         }
     }
 }
