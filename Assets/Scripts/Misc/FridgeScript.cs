@@ -19,7 +19,8 @@ public class FridgeScript : MonoBehaviour
         {
             health -= 10f;
         }
-        else
+
+        if (health <= 0)
         {
             CameraScript.Instance.target = gameObject.transform;
             CameraScript.Instance.ChangeTarget();

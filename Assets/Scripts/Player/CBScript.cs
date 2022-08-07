@@ -13,7 +13,6 @@ public class CBScript : MonoBehaviour
         hitBoxSlam = transform.GetChild(2).gameObject;
         hitBoxShock = transform.GetChild(3).gameObject;
         playerControl = GetComponent<PlayerControl>();
-        playerControl.moveSpeed = 15;
     }
 
     private void SlamWindUp()

@@ -260,6 +260,33 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
                     ""id"": ""1281229a-8241-4756-8f97-d4307986dcd9"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
+                    ""interactions"": ""Tap"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""TapHold"",
+                    ""type"": ""Button"",
+                    ""id"": ""1a484b1f-1a8e-4b10-9c12-459288b70818"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press"",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""JumpTap"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""f86164ed-7b1f-4091-9d1b-f065aab254c5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondContact"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""cf5ccc49-4039-4474-a9d3-4721dd0e20db"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 }
@@ -290,11 +317,66 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""b52d5c56-fc56-49ae-8a97-9c6e5c8c284b"",
-                    ""path"": ""<Touchscreen>/primaryTouch/tap"",
+                    ""path"": ""<Touchscreen>/primaryTouch/press"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""TouchScreen"",
                     ""action"": ""Tap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f81151a3-4ae2-429f-a0ad-d4772bf961d0"",
+                    ""path"": ""<Touchscreen>/primaryTouch/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""TapHold"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Button With One Modifier"",
+                    ""id"": ""293a467a-2057-4f1f-bf7f-7a681a881f3b"",
+                    ""path"": ""ButtonWithOneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""JumpTap"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Modifier"",
+                    ""id"": ""4c17f453-d48c-4b5c-a276-cd69c484a51c"",
+                    ""path"": ""<Touchscreen>/touch1/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""JumpTap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Button"",
+                    ""id"": ""31c4b941-729e-4e45-9b84-1ec6e0b686fb"",
+                    ""path"": ""<Touchscreen>/primaryTouch/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""JumpTap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ca440e35-2fcc-49ab-89bd-49b23f55e441"",
+                    ""path"": ""<Touchscreen>/touch1/press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""TouchScreen"",
+                    ""action"": ""SecondContact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -348,6 +430,9 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
         m_Player_Swipe_PrimaryContact = m_Player_Swipe.FindAction("PrimaryContact", throwIfNotFound: true);
         m_Player_Swipe_PrimaryPosition = m_Player_Swipe.FindAction("PrimaryPosition", throwIfNotFound: true);
         m_Player_Swipe_Tap = m_Player_Swipe.FindAction("Tap", throwIfNotFound: true);
+        m_Player_Swipe_TapHold = m_Player_Swipe.FindAction("TapHold", throwIfNotFound: true);
+        m_Player_Swipe_JumpTap = m_Player_Swipe.FindAction("JumpTap", throwIfNotFound: true);
+        m_Player_Swipe_SecondContact = m_Player_Swipe.FindAction("SecondContact", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -467,6 +552,9 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Swipe_PrimaryContact;
     private readonly InputAction m_Player_Swipe_PrimaryPosition;
     private readonly InputAction m_Player_Swipe_Tap;
+    private readonly InputAction m_Player_Swipe_TapHold;
+    private readonly InputAction m_Player_Swipe_JumpTap;
+    private readonly InputAction m_Player_Swipe_SecondContact;
     public struct Player_SwipeActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -474,6 +562,9 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
         public InputAction @PrimaryContact => m_Wrapper.m_Player_Swipe_PrimaryContact;
         public InputAction @PrimaryPosition => m_Wrapper.m_Player_Swipe_PrimaryPosition;
         public InputAction @Tap => m_Wrapper.m_Player_Swipe_Tap;
+        public InputAction @TapHold => m_Wrapper.m_Player_Swipe_TapHold;
+        public InputAction @JumpTap => m_Wrapper.m_Player_Swipe_JumpTap;
+        public InputAction @SecondContact => m_Wrapper.m_Player_Swipe_SecondContact;
         public InputActionMap Get() { return m_Wrapper.m_Player_Swipe; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -492,6 +583,15 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
                 @Tap.started -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTap;
                 @Tap.performed -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTap;
                 @Tap.canceled -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTap;
+                @TapHold.started -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTapHold;
+                @TapHold.performed -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTapHold;
+                @TapHold.canceled -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnTapHold;
+                @JumpTap.started -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnJumpTap;
+                @JumpTap.performed -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnJumpTap;
+                @JumpTap.canceled -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnJumpTap;
+                @SecondContact.started -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnSecondContact;
+                @SecondContact.performed -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnSecondContact;
+                @SecondContact.canceled -= m_Wrapper.m_Player_SwipeActionsCallbackInterface.OnSecondContact;
             }
             m_Wrapper.m_Player_SwipeActionsCallbackInterface = instance;
             if (instance != null)
@@ -505,6 +605,15 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
                 @Tap.started += instance.OnTap;
                 @Tap.performed += instance.OnTap;
                 @Tap.canceled += instance.OnTap;
+                @TapHold.started += instance.OnTapHold;
+                @TapHold.performed += instance.OnTapHold;
+                @TapHold.canceled += instance.OnTapHold;
+                @JumpTap.started += instance.OnJumpTap;
+                @JumpTap.performed += instance.OnJumpTap;
+                @JumpTap.canceled += instance.OnJumpTap;
+                @SecondContact.started += instance.OnSecondContact;
+                @SecondContact.performed += instance.OnSecondContact;
+                @SecondContact.canceled += instance.OnSecondContact;
             }
         }
     }
@@ -548,5 +657,8 @@ public partial class @PlayerInputActions : IInputActionCollection2, IDisposable
         void OnPrimaryContact(InputAction.CallbackContext context);
         void OnPrimaryPosition(InputAction.CallbackContext context);
         void OnTap(InputAction.CallbackContext context);
+        void OnTapHold(InputAction.CallbackContext context);
+        void OnJumpTap(InputAction.CallbackContext context);
+        void OnSecondContact(InputAction.CallbackContext context);
     }
 }

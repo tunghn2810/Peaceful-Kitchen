@@ -60,6 +60,11 @@ public class GameStateScript : MonoBehaviour
     private const float AIR_MIN_TIME = 11;
     private const float AIR_MAX_TIME = 18;
 
+    private int level = 1;
+    public float timer;
+    private const float TIMER_OFFSET = 30f;
+    private float levelThreshold = 60;
+
     private void Awake()
     {
         //Singleton
@@ -78,46 +83,53 @@ public class GameStateScript : MonoBehaviour
     {
         if (startGame)
         {
-            if (canSpawnTier1_1 && canSpawnTier1_2)
+            timer += Time.deltaTime;
+            if (timer >= levelThreshold)
+            {
+                level++;
+                levelThreshold = levelThreshold + level * TIMER_OFFSET;
+            }
+
+            if (canSpawnTier2_1 && canSpawnTier2_2)
+            {
+                float rnd1 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
+                EnemySpawn.Instance.BothTier(0, rnd1, level);
+
+                float rnd2 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
+                EnemySpawn.Instance.BothTier(1, rnd2, level);
+
+                canSpawnTier2_1 = false;
+                canSpawnTier2_2 = false;
+            }
+            else if (canSpawnTier1_1 && canSpawnTier1_2)
             {
                 if (firstTime) //First spawn is 5 seconds sooner than subsequent spawns
                 {
                     float rnd1 = Random.Range(NORMAL_MIN_TIME - 5, NORMAL_MAX_TIME - 5);
-                    EnemySpawn.Instance.Tier1(0, rnd1);
+                    EnemySpawn.Instance.Tier1(0, rnd1, level);
 
                     float rnd2 = Random.Range(NORMAL_MIN_TIME - 5, NORMAL_MAX_TIME - 5);
-                    EnemySpawn.Instance.Tier1(1, rnd2);
+                    EnemySpawn.Instance.Tier1(1, rnd2, level);
 
                     firstTime = false;
                 }
                 else
                 {
                     float rnd1 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                    EnemySpawn.Instance.Tier1(0, rnd1);
+                    EnemySpawn.Instance.Tier1(0, rnd1, level);
 
                     float rnd2 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                    EnemySpawn.Instance.Tier1(1, rnd2);
+                    EnemySpawn.Instance.Tier1(1, rnd2, level);
                 }
 
                 canSpawnTier1_1 = false;
                 canSpawnTier1_2 = false;
             }
-            else if (canSpawnTier2_1 && canSpawnTier2_2)
-            {
-                float rnd1 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                EnemySpawn.Instance.BothTier(0, rnd1);
-
-                float rnd2 = Random.Range(NORMAL_MIN_TIME, NORMAL_MAX_TIME);
-                EnemySpawn.Instance.BothTier(1, rnd2);
-
-                canSpawnTier2_1 = false;
-                canSpawnTier2_2 = false;
-            }
 
             if (canSpawnMid)
             {
                 float rnd = Random.Range(MID_MIN_TIME, MID_MAX_TIME);
-                EnemySpawn.Instance.Mid(rnd);
+                EnemySpawn.Instance.Mid(rnd, level);
 
                 canSpawnMid = false;
             }
@@ -125,7 +137,7 @@ public class GameStateScript : MonoBehaviour
             if (canSpawnAir)
             {
                 float rnd = Random.Range(AIR_MIN_TIME, AIR_MAX_TIME);
-                EnemySpawn.Instance.Mid(rnd);
+                EnemySpawn.Instance.Mid(rnd, level);
 
                 canSpawnAir = false;
             }
@@ -134,17 +146,20 @@ public class GameStateScript : MonoBehaviour
 
     public IEnumerator Loading()
     {
-        //Fade into loading toaster
+        //Fade out -> Fade in
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
-        
-        loadingToaster.SetActive(true);
-        
         blackOverlayAnim.SetBool("isFadeIn", true);
         blackOverlayAnim.SetBool("isFadeOut", false);
+
+        //Loading screen
+        loadingToaster.SetActive(true);
+
+        //Wait for fade in animation
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
 
+        //Point to next screen
         if (nextScreen == 0)
         {
             yield return HomeMenu();
@@ -161,24 +176,25 @@ public class GameStateScript : MonoBehaviour
 
     public IEnumerator HomeMenu()
     {
-        //Fade into the home menu
+        //Fade out -> Fade in
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
-
         blackOverlayAnim.SetBool("isFadeIn", true);
         blackOverlayAnim.SetBool("isFadeOut", false);
 
+        //Set canvases
         menuCanvas.SetActive(true);
-
         loadingToaster.SetActive(false);
         gameplayCanvas.SetActive(false);
         controlCanvas.SetActive(false);
         endCanvas.SetActive(false);
         pauseCanvas.SetActive(false);
 
+        //Wait for fade in animation
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
 
+        //Reset game values
         ResetGame();
 
         yield return null;
@@ -186,19 +202,19 @@ public class GameStateScript : MonoBehaviour
 
     public IEnumerator Tutorial()
     {
-        //Fade into tutorial
+        //Fade out -> Fade in
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
-
         blackOverlayAnim.SetBool("isFadeIn", true);
         blackOverlayAnim.SetBool("isFadeOut", false);
 
+        //Set canvases
         gameplayCanvas.SetActive(true);
         tutorialCanvas.SetActive(true);
-
         loadingToaster.SetActive(false);
         menuCanvas.SetActive(false);
 
+        //Wait for fade in animation
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
 
@@ -207,24 +223,34 @@ public class GameStateScript : MonoBehaviour
 
     public IEnumerator Gameplay()
     {
-        //Fade into gameplay
+        //Fade out -> Fade in
         blackOverlayAnim.SetBool("isFadeOut", true);
         yield return new WaitForSeconds(1.0f);
-
         blackOverlayAnim.SetBool("isFadeIn", true);
         blackOverlayAnim.SetBool("isFadeOut", false);
 
+        //Set canvases
         gameplayCanvas.SetActive(true);
         controlCanvas.SetActive(true);
-
         tutorialCanvas.SetActive(false);
         loadingToaster.SetActive(false);
         menuCanvas.SetActive(false);
 
+        //Wait for fade in animation
         yield return new WaitForSeconds(1.0f);
         blackOverlayAnim.SetBool("isFadeIn", false);
 
-        ControlsManager.Instance.BasicControl();
+        //Set control
+        if (ControlsManager.Instance.currentMode == 0)
+        {
+            ControlsManager.Instance.SwipeControl();
+        }
+        else if (ControlsManager.Instance.currentMode == 1)
+        {
+            ControlsManager.Instance.BasicControl();
+        }
+        
+        //Start game bools
         startGame = true;
         firstTime = true;
 
@@ -233,12 +259,16 @@ public class GameStateScript : MonoBehaviour
 
     public IEnumerator GameOver()
     {
+        //Wait for lose animation
         yield return new WaitForSeconds(1.0f);
 
+        //Disable controls and enemy spawn
+        ControlsManager.Instance.NoControl();
         controlCanvas.SetActive(false);
-        endCanvas.SetActive(true);
-
         EnemySpawn.Instance.StopSpawning();
+
+        //Set end canvas
+        endCanvas.SetActive(true);
 
         yield return null;
     }
@@ -246,6 +276,7 @@ public class GameStateScript : MonoBehaviour
     //When the play button is pressed
     public void PlayButton()
     {
+        //Point to the next screen
         if (showTutorial)
         {
             nextScreen = 1;
@@ -254,14 +285,18 @@ public class GameStateScript : MonoBehaviour
         {
             nextScreen = 2;
         }
+
+        //Start the loading screen
         StartCoroutine(Loading());
     }
 
     //When the player closes the tutorial to start the game
     public void CloseTutorial()
     {
+        //Start the game
         nextScreen = 2;
         startGame = true;
+
         tutorialAnim.SetBool("isClose", true);
     }
 
@@ -270,6 +305,7 @@ public class GameStateScript : MonoBehaviour
     {
         nextScreen = 3;
         startGame = false;
+
         StartCoroutine(GameOver());
     }
 
@@ -278,8 +314,12 @@ public class GameStateScript : MonoBehaviour
     {
         nextScreen = 4;
         startGame = false;
+
+        //Set canvases
         controlCanvas.SetActive(false);
         pauseCanvas.SetActive(true);
+        
+        //Pause time
         Time.timeScale = 0;
     }
 
@@ -288,17 +328,24 @@ public class GameStateScript : MonoBehaviour
     {
         nextScreen = 2;
         startGame = true;
+
+        //Set canvases
         controlCanvas.SetActive(true);
         pauseCanvas.SetActive(false);
+
+        //Resume time
         Time.timeScale = 1;
     }
 
     //When the player presses the Home button
     public void HomeButton()
     {
-        Time.timeScale = 1;
         nextScreen = 0;
         startGame = false;
+
+        //Resume time in case  the button is pressed on the pause screen
+        Time.timeScale = 1;
+
         StartCoroutine(Loading());
     }
 
@@ -308,7 +355,16 @@ public class GameStateScript : MonoBehaviour
         ResetGame();
 
         controlCanvas.SetActive(true);
-        ControlsManager.Instance.BasicControl();
+
+        if (ControlsManager.Instance.currentMode == 0)
+        {
+            ControlsManager.Instance.SwipeControl();
+        }
+        else if (ControlsManager.Instance.currentMode == 1)
+        {
+            ControlsManager.Instance.BasicControl();
+        }
+
         startGame = true;
         firstTime = true;
     }
@@ -328,6 +384,10 @@ public class GameStateScript : MonoBehaviour
         canSpawnTier2_2 = false;
         canSpawnMid = false;
         canSpawnAir = false;
+
+        timer = 0;
+        levelThreshold = 60;
+        level = 1;
 }
 
     //When the player presses the Settings button

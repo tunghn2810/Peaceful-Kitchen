@@ -12,7 +12,7 @@ public class ControlsManager : MonoBehaviour
     private List<PlayerControl> playerControls = new List<PlayerControl>();
 
     //For switching controls
-    public int currentMode = -1; //0 is Swipe, 1 is Basic, 2 is Dpad
+    public int currentMode = 1; //0 is Swipe, 1 is Basic
     public GameObject OnScreenControls;
 
     //For switching characters
@@ -38,10 +38,13 @@ public class ControlsManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
 
+    private void Start()
+    {
         PlayerInit();
         ControlInit();
-        
+
         //Testing only
         //BasicControl();
     }
@@ -101,6 +104,17 @@ public class ControlsManager : MonoBehaviour
         currentMode = 1;
     }
 
+    public void NoControl()
+    {
+        for (int i = 0; i < playerCharacters.Length; i++)
+        {
+            swipeDetections[i].SwipeModeOff();
+            playerControls[i].BasicModeOff();
+        }
+
+        OnScreenControls.SetActive(false);
+    }
+
     //Transform into another character
     public void Transformation()
     {
@@ -133,7 +147,6 @@ public class ControlsManager : MonoBehaviour
             playerControls[i].ChangeSide();
         }
 
-        CameraScript.Instance.target = currentCharacter.transform; //Set camera to point at the new one
         CameraScript.Instance.ChangeTarget();
     }
 
@@ -151,10 +164,16 @@ public class ControlsManager : MonoBehaviour
     //Temporarily enable components the character being transformed into
     private void TempEnable(GameObject character)
     {
-        for (int i = 0; i < character.transform.childCount - 1; i++)
+        for (int i = 0; i < character.transform.childCount; i++)
         {
+            if (character.transform.GetChild(i).tag == "Ladle" || character.transform.GetChild(i).tag == "Board")
+            {
+                continue;
+            }
+
             character.transform.GetChild(i).gameObject.SetActive(true);
         }
+
         character.GetComponent<Rigidbody2D>().simulated = true;
         character.GetComponent<PlayerControl>().isCurrent = true;
     }

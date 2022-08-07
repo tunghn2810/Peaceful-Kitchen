@@ -17,7 +17,7 @@ public class EnemyScript : MonoBehaviour
     //Bool checks
     private bool isDead = false;
     private bool isJump = false;
-    private float jumpSpeed = 105f;
+    private float jumpSpeed = 50f;
 
     private int hitCols;
 
@@ -77,33 +77,29 @@ public class EnemyScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (hitCols <= 0)
+        if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
         {
-            if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
+            if (collision.gameObject.tag == "Toast")
             {
-                if (collision.gameObject.tag == "Toast")
-                {
-                    collision.gameObject.GetComponent<ToastScript>().Die();
-                }
-
-                if (collision.gameObject.tag == "RiceBall")
-                {
-                    collision.gameObject.GetComponent<RiceScript>().Explode();
-                }
-
-                health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
-
-                if (health <= 0)
-                {
-                    Explode();
-                }
-
-                hitCols++;
-
-                int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
-                GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
-                Destroy(hitEffect, 1.0f);
+                collision.gameObject.GetComponent<ToastScript>().Die();
             }
+
+            if (collision.gameObject.tag == "RiceBall")
+            {
+                collision.gameObject.GetComponent<RiceScript>().Explode();
+            }
+
+            health -= collision.gameObject.GetComponent<WeaponScript>().Damage();
+
+            if (health <= 0)
+            {
+                Explode();
+            }
+
+
+            int rndEffect = Random.Range(0, EffectReferences.Instance.hitEffects.Length);
+            GameObject hitEffect = Instantiate(EffectReferences.Instance.hitEffects[rndEffect], gameObject.transform.position, EffectReferences.Instance.hitEffects[rndEffect].transform.rotation);
+            Destroy(hitEffect, 1.0f);
         }
 
         if (collision.gameObject.layer == Layer.Platform)
@@ -114,14 +110,6 @@ public class EnemyScript : MonoBehaviour
                 currVelocity = rgbd.velocity.x;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.gameObject.layer == Layer.Weapon_Veg || collision.gameObject.layer == Layer.Weapon_Meat)
-        {
-            hitCols--;
         }
     }
 

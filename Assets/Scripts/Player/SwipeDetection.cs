@@ -28,12 +28,19 @@ public class SwipeDetection : MonoBehaviour
     {
         InputManager.Instance.OnStartTouch += SwipeStart;
         InputManager.Instance.OnEndTouch += SwipeEnd;
+        InputManager.Instance.OnTapHold += TapAndHold;
+        InputManager.Instance.OnHoldRelease += HoldRelease;
+        InputManager.Instance.OnTap += Tap;
+        InputManager.Instance.OnJumpTap += JumpTap;
     }
 
     public void SwipeModeOff()
     {
         InputManager.Instance.OnStartTouch -= SwipeStart;
         InputManager.Instance.OnEndTouch -= SwipeEnd;
+        InputManager.Instance.OnTapHold -= TapAndHold;
+        InputManager.Instance.OnTap -= Tap;
+        InputManager.Instance.OnJumpTap -= JumpTap;
     }
 
     private void SwipeStart(Vector2 position, float time)
@@ -67,19 +74,53 @@ public class SwipeDetection : MonoBehaviour
     {
         if (Vector2.Dot(Vector2.up, direction) > directionThreshold)
         {
-            playerControl.JumpSwipe();
+            //playerControl.JumpSwipe();
         }
         if (Vector2.Dot(Vector2.down, direction) > directionThreshold)
         {
-            Debug.Log("Down");
+            //Debug.Log("Down");
         }
         if (Vector2.Dot(Vector2.left, direction) > directionThreshold)
         {
-            playerControl.SlideAttack(false);
+            //playerControl.SlideAttack(false);
         }
         if (Vector2.Dot(Vector2.right, direction) > directionThreshold)
         {
-            playerControl.SlideAttack(true);
+            //playerControl.SlideAttack(true);
         }
+    }
+
+    public void TapAndHold(Vector2 position)
+    {
+        if (position.x < Screen.width/2)
+        {
+            playerControl.MoveStart(Vector2.left);
+        }
+        else
+        {
+            playerControl.MoveStart(Vector2.right);
+        }
+    }
+
+    public void HoldRelease()
+    {
+        playerControl.MoveEnd();
+    }
+
+    public void Tap(Vector2 position)
+    {
+        if (position.x < Screen.width / 2)
+        {
+            playerControl.TapAttack(false);
+        }
+        else
+        {
+            playerControl.TapAttack(true);
+        }
+    }
+
+    public void JumpTap(bool isHeld)
+    {
+        playerControl.Jump(isHeld);
     }
 }

@@ -33,7 +33,7 @@ public class ScoreScript : MonoBehaviour
     {
         scoreText.text = score.ToString();
 
-        if (score == 5)
+        if (score == 4)
         {
             if (canSpawnTier2)
             {
@@ -42,7 +42,7 @@ public class ScoreScript : MonoBehaviour
                 canSpawnTier2 = false;
             }
         }
-        else if (score == 7)
+        else if (score == 8)
         {
             if (canSpawnAir)
             {
@@ -50,7 +50,7 @@ public class ScoreScript : MonoBehaviour
                 canSpawnAir = false;
             }
         }
-        else if (score == 10)
+        else if (score == 12)
         {
             if (canSpawnMid)
             {
@@ -63,8 +63,8 @@ public class ScoreScript : MonoBehaviour
     public void ResetScore()
     {
         score = 0;
-        canSpawnTier2 = false;
-        canSpawnAir = false;
-        canSpawnMid = false;
+        canSpawnTier2 = true;
+        canSpawnAir = true;
+        canSpawnMid = true;
     }
 }

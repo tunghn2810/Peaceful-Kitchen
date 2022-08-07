@@ -38,12 +38,20 @@ public class TutorialScript : MonoBehaviour
         }
     }
 
-    public void CloseTutorial()
+    public void TutorialClosed()
     {
-        gameObject.transform.parent.gameObject.SetActive(false);
-
         GameStateScript.Instance.controlCanvas.SetActive(true);
-        ControlsManager.Instance.BasicControl();
+
+        if (ControlsManager.Instance.currentMode == 0)
+        {
+            ControlsManager.Instance.SwipeControl();
+        }
+        else if (ControlsManager.Instance.currentMode == 1)
+        {
+            ControlsManager.Instance.BasicControl();
+        }
+
+        gameObject.transform.parent.gameObject.SetActive(false);
     }
 
     public void NextPage()

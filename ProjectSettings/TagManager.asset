@@ -18,6 +18,7 @@ TagManager:
   - Board
   - RiceBall
   - SugarCube
+  - RiceBallExplosion
   layers:
   - Default
   - TransparentFX

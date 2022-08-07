@@ -14,7 +14,6 @@ public class RCScript : MonoBehaviour
     private void Awake()
     {
         playerControl = GetComponent<PlayerControl>();
-        playerControl.moveSpeed = 10;
     }
 
     private void SpawnRice()

@@ -275,14 +275,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a47dafa62e3eaf40b25bb94fef0a212, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weapon: {fileID: 0}
+  weapons: []
   isGrounded: 0
   isSlaming: 0
   isRecovering: 0
   slamShakeOnce: 0
   isCooking: 0
   flip: 1
-  moveSpeed: 10
+  moveSpeed: 15
   isCurrent: 1
 --- !u!114 &3264743106555951824
 MonoBehaviour:
@@ -397,7 +397,7 @@ GameObject:
   - component: {fileID: 7167530559846246249}
   m_Layer: 16
   m_Name: HitBox - ShockWave
-  m_TagString: Untagged
+  m_TagString: Board
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -511,7 +511,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.03885934, y: 0.40125018}

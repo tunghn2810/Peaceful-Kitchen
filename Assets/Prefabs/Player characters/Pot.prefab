@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 2412012399844342868}
   - component: {fileID: 909217110}
   m_Layer: 16
-  m_Name: HitBox
+  m_Name: HitBox - Bonk
   m_TagString: Ladle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &310028048
 Transform:
   m_ObjectHideFlags: 0
@@ -231,10 +231,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a47dafa62e3eaf40b25bb94fef0a212, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weapons: []
   isGrounded: 0
   isSlaming: 0
   isRecovering: 0
   slamShakeOnce: 0
+  isCooking: 0
   flip: 1
   moveSpeed: 10
   isCurrent: 1

@@ -28,7 +28,7 @@ public class CameraScript : MonoBehaviour
 
     private void Start()
     {
-        target = ControlsManager.Instance.currentCharacter.transform;
+        //target = ControlsManager.Instance.currentCharacter.transform;
         cinemachine = GetComponent<CinemachineVirtualCamera>();
 
         ChangeTarget();

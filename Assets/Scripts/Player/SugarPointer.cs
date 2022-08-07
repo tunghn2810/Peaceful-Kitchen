@@ -8,7 +8,8 @@ public class SugarPointer : MonoBehaviour
     public static SugarPointer Instance { get; set; }
 
     private Transform targetPos;
-    public RectTransform pointerRectTransform;
+    public RectTransform pointerMoveRect;
+    public RectTransform pointerRotateRect;
     public RectTransform pointerIcon;
     private Camera mainCamera;
 
@@ -40,32 +41,33 @@ public class SugarPointer : MonoBehaviour
             Vector3 fromPos = mainCamera.transform.position;
             fromPos.z = -10;
             Vector3 direction = (toPos - fromPos).normalized;
-            float distanceScaled = (toPos - fromPos).magnitude * 0.02f;
+            float distanceScaled = (toPos - fromPos).magnitude * 0.05f;
+            float scaleClamped = Mathf.Clamp(distanceScaled, 0, 1f);
 
             float angle = (Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg) % 360;
-            pointerRectTransform.localEulerAngles = new Vector3(0, 0, angle + 90);
-            pointerRectTransform.localScale = new Vector3(distanceScaled, distanceScaled, pointerRectTransform.localScale.z);
+            pointerRotateRect.localEulerAngles = new Vector3(0, 0, angle + 90);
 
-            pointerIcon.localScale = new Vector3(distanceScaled, distanceScaled, pointerIcon.localScale.z);
+            pointerMoveRect.localScale = new Vector3(scaleClamped, scaleClamped, pointerMoveRect.localScale.z);
+            //pointerIcon.localScale = new Vector3(scaleClamped, scaleClamped, pointerIcon.localScale.z);
 
-            float borderOffset = 200f * distanceScaled;
+            float borderOffset = 200f * scaleClamped;
 
             Vector3 targetPosScreenPoint = mainCamera.WorldToScreenPoint(toPos);
             bool isOffScreen = targetPosScreenPoint.x <= borderOffset || targetPosScreenPoint.x >= Screen.width - borderOffset || targetPosScreenPoint.y <= borderOffset || targetPosScreenPoint.y >= Screen.height - borderOffset;
 
             if (isOffScreen)
             {
-                pointerRectTransform.gameObject.SetActive(true);
+                pointerMoveRect.gameObject.SetActive(true);
                 pointerIcon.gameObject.SetActive(true);
 
                 Vector3 cappedTargetScreenPos = targetPosScreenPoint;
                 cappedTargetScreenPos.x = Mathf.Clamp(cappedTargetScreenPos.x, borderOffset, Screen.width - borderOffset);
                 cappedTargetScreenPos.y = Mathf.Clamp(cappedTargetScreenPos.y, borderOffset, Screen.height - borderOffset);
 
-                pointerRectTransform.position = cappedTargetScreenPos;
-                pointerRectTransform.localPosition = new Vector3(pointerRectTransform.localPosition.x, pointerRectTransform.localPosition.y, -10f);
+                pointerMoveRect.position = cappedTargetScreenPos;
+                pointerMoveRect.localPosition = new Vector3(pointerMoveRect.localPosition.x, pointerMoveRect.localPosition.y, -10f);
 
-                pointerIcon.position = new Vector3(pointerRectTransform.position.x, pointerRectTransform.position.y - 30, pointerRectTransform.position.z);
+                pointerIcon.position = new Vector3(pointerRotateRect.position.x, pointerRotateRect.position.y, pointerRotateRect.position.z);
             }
             else
             {
@@ -73,7 +75,7 @@ public class SugarPointer : MonoBehaviour
                 //pointerRectTransform.localPosition = new Vector3(pointerRectTransform.localPosition.x, pointerRectTransform.localPosition.y, -10f);
                 //
                 //pointerIcon.position = new Vector3(pointerRectTransform.position.x, pointerRectTransform.position.y - 30, pointerRectTransform.position.z);
-                pointerRectTransform.gameObject.SetActive(false);
+                pointerMoveRect.gameObject.SetActive(false);
                 pointerIcon.gameObject.SetActive(false);
             }
         }

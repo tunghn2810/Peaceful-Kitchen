@@ -17,10 +17,20 @@ public class InputManager : MonoBehaviour
     public event StartTouch OnStartTouch;
     public delegate void EndTouch(Vector2 position, float time);
     public event EndTouch OnEndTouch;
-    
+
     //Tap
     public delegate void Tap(Vector2 position);
     public event Tap OnTap;
+    public delegate void JumpTap(bool isHeld);
+    public event JumpTap OnJumpTap;
+
+    private bool isSecondTouch = false;
+
+    //Tap and hold
+    public delegate void TapHold(Vector2 position);
+    public event TapHold OnTapHold;
+    public delegate void TapHoldRelease();
+    public event TapHoldRelease OnHoldRelease;
 
     //Keyboard + Gamepad
     public delegate void MoveButtonStart(Vector2 position);
@@ -69,6 +79,12 @@ public class InputManager : MonoBehaviour
 
         //Tap
         playerInputActions.Player_Swipe.Tap.performed += ctx => TapPrimary(ctx);
+        playerInputActions.Player_Swipe.JumpTap.performed += ctx => JumpTapPrimary(ctx);
+        playerInputActions.Player_Swipe.SecondContact.performed += ctx => SeconTouchPrimary(ctx);
+
+        //Tap and hold
+        playerInputActions.Player_Swipe.TapHold.performed += ctx => TapHoldPrimary(ctx);
+        playerInputActions.Player_Swipe.TapHold.canceled += ctx => HoldRelease();
 
         //Keyboard + GamePad
         playerInputActions.Player_Basic.Move.performed += ctx => MoveStart(ctx);
@@ -80,8 +96,19 @@ public class InputManager : MonoBehaviour
         playerInputActions.Player_Basic.Reset.performed += ctx => ResetButton(ctx);
     }
 
+    bool isTouching = false;
+
+    private void Update()
+    {
+        if (isTouching)
+        {
+            //Debug.Log(PrimaryPosition());
+        }
+    }
+
     private void StartTouchPrimary(InputAction.CallbackContext context)
     {
+        isTouching = true;
         //if (OnStartTouch != null)
         //{
         //    OnStartTouch(ScreenToWorld(mainCamera, playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>()), (float)//context.startTime);
@@ -109,6 +136,7 @@ public class InputManager : MonoBehaviour
 
     private void EndTouchPrimary(InputAction.CallbackContext context)
     {
+        isTouching = false;
         if (OnEndTouch != null)
         {
             OnEndTouch(PrimaryPosition(), (float)context.time);
@@ -132,7 +160,48 @@ public class InputManager : MonoBehaviour
     {
         if (OnTap != null)
         {
-            OnTap(PrimaryPosition());
+            OnTap(playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>());
+        }
+    }
+
+    private void JumpTapPrimary(InputAction.CallbackContext context)
+    {
+        if (OnJumpTap != null)
+        {
+            OnJumpTap(DoJump());
+        }
+    }
+
+    private void SeconTouchPrimary(InputAction.CallbackContext context)
+    {
+         isSecondTouch = context.ReadValueAsButton();
+    }
+
+    private bool DoJump()
+    {
+        if (isSecondTouch)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private void TapHoldPrimary(InputAction.CallbackContext context)
+    {
+        if (OnTapHold != null)
+        {
+            OnTapHold(playerInputActions.Player_Swipe.PrimaryPosition.ReadValue<Vector2>());
+        }
+    }
+
+    private void HoldRelease()
+    {
+        if (OnHoldRelease != null)
+        {
+            OnHoldRelease();
         }
     }
 

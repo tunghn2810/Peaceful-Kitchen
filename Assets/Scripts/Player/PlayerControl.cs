@@ -9,7 +9,7 @@ public class PlayerControl : MonoBehaviour
     //References
     private Rigidbody2D rgbd;
     private Animator anim;
-    public WeaponScript[] weapons; //Only for pot and rice cooker
+    [SerializeField] private WeaponScript[] weapons; //Only for pot and rice cooker
 
     //Bool checks
     public bool isGrounded;
@@ -30,7 +30,7 @@ public class PlayerControl : MonoBehaviour
 
     //General stats
     private float jumpSpeed = 25f;
-    public float moveSpeed = 10f; //Base speed. Characters may change this
+    public float moveSpeed; //Base speed. Characters may change this
 
     //Currently active
     public bool isCurrent = true;
@@ -86,11 +86,57 @@ public class PlayerControl : MonoBehaviour
         //For Swipe control
         if (ControlsManager.Instance.currentMode == 0)
         {
-            //TODO
+            if (isSlaming) //Only happens when slamming
+            {
+                if (isGrounded)
+                {
+                    if (isRecovering)
+                    {
+                        rgbd.velocity = new Vector2(0, 0);
+                    }
+                    else
+                    {
+                        rgbd.velocity = new Vector2(moveDirection * moveSpeed, 0);
+                        if (!slamShakeOnce)
+                        {
+                            CameraShake.Instance.ShakeCamera();
+                            slamShakeOnce = true;
+                        }
+                    }
+                }
+                else
+                {
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, -30f);
+                }
+            }
+            else if (isCooking)
+            {
+                rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            }
+            else
+            {
+                //Update velocity every frame
+                if (isMoving)
+                {
+                    rgbd.velocity = new Vector2(moveDirection * moveSpeed, rgbd.velocity.y);
+                }
+                else
+                {
+                    rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+                }
+
+                //Jump if the Jump button is held and the character is grounded
+                if (isJumping && isGrounded)
+                {
+                    JumpEffect();
+                    rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
+                    rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
+                }
+            }
         }
 
         //For Basic control & Dpad control
-        if (ControlsManager.Instance.currentMode == 1)
+        else if (ControlsManager.Instance.currentMode == 1)
         {
             if (isSlaming) //Only happens when slamming
             {
@@ -231,6 +277,21 @@ public class PlayerControl : MonoBehaviour
             flip = -1;
             rgbd.velocity = new Vector2(0, rgbd.velocity.y);
             rgbd.AddForce(Vector2.left * 20f, ForceMode2D.Impulse);
+            transform.localScale = new Vector3(transform.localScale.x * Flip(flip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+        Attack();
+    }
+
+    public void TapAttack(bool isLookingRight)
+    {
+        if (isLookingRight)
+        {
+            flip = 1;
+            transform.localScale = new Vector3(transform.localScale.x * Flip(flip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+        else
+        {
+            flip = -1;
             transform.localScale = new Vector3(transform.localScale.x * Flip(flip, transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
         Attack();

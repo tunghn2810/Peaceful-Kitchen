@@ -17,7 +17,6 @@ public class ToasterScript : MonoBehaviour
     {
         shootPos = toastPos.GetComponentsInChildren<Transform>();
         playerControl = GetComponent<PlayerControl>();
-        playerControl.moveSpeed = 10;
     }
 
     private void ShootToasts()

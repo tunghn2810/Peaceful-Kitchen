@@ -11,7 +11,6 @@ public class PotScript : MonoBehaviour
     {
         hitBox = transform.GetChild(2).gameObject;
         playerControl = GetComponent<PlayerControl>();
-        playerControl.moveSpeed = 10;
     }
 
     private void Bonk()

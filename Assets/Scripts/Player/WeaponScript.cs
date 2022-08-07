@@ -9,7 +9,11 @@ public class WeaponScript : MonoBehaviour
     private void Start()
     {
         type = gameObject.tag;
-        ChangeLayer();
+
+        if (gameObject.tag != "RiceBallExplosion")
+        {
+            ChangeLayer();
+        }
     }
 
     public float Damage()
@@ -26,7 +30,7 @@ public class WeaponScript : MonoBehaviour
         {
             return 100f;
         }
-        else if (type == "RiceBall")
+        else if ( type == "RiceBall" || type == "RiceBallExplosion")
         {
             return 100f;
         }
