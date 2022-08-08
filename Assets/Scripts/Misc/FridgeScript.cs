@@ -5,12 +5,13 @@ using UnityEngine;
 public class FridgeScript : MonoBehaviour
 {
     private Animator anim;
-
     private float health = 30f;
+    private int layer;
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
+        layer = gameObject.layer;
     }
 
     public void TakeDamage()
@@ -22,8 +23,7 @@ public class FridgeScript : MonoBehaviour
 
         if (health <= 0)
         {
-            CameraScript.Instance.target = gameObject.transform;
-            CameraScript.Instance.ChangeTarget();
+            CameraScript.Instance.ChangeTarget(gameObject.transform);
             ControlsManager.Instance.currentCharacter.SetActive(false);
 
             //Spawn the particle effect
@@ -44,5 +44,6 @@ public class FridgeScript : MonoBehaviour
     {
         anim.SetBool("isBroken", false);
         health = 30;
+        gameObject.layer = layer;
     }
 }

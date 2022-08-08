@@ -51,6 +51,11 @@ public class EnemySpawn : MonoBehaviour
     {
         GameObject newEnemy = Instantiate(enemyToSpawn, positionToSpawn, Quaternion.identity);
         newEnemy.GetComponent<EnemyScript>().SetSpeed(flip);
+        
+        if (IngameTutorials.Instance.enemyTutorial)
+        {
+            IngameTutorials.Instance.ShowEnemyText(newEnemy);
+        }
     }
 
     private void SpawnAirEnemy(GameObject enemyToSpawn, Vector3 positionToSpawn, int flip)
@@ -85,6 +90,18 @@ public class EnemySpawn : MonoBehaviour
         }
     }
 
+    public void Normal(int type, float waitTime, int level, bool isTier1)
+    {
+        if (type == 0)
+        {
+            StartCoroutine(SpawnNormal(bean, eggplant, vegSpawn.position, -1, waitTime, level, isTier1));
+        }
+        else if (type == 1)
+        {
+            StartCoroutine(SpawnNormal(hotdog, chicken, meatSpawn.position, 1, waitTime, level, isTier1));
+        }
+    }
+
     //Spawn a wave in the middle spawn (should have different timing from the normal spawns)
     public void Mid(float waitTime, int level)
     {
@@ -95,6 +112,42 @@ public class EnemySpawn : MonoBehaviour
     public void Flying(float waitTime, int level)
     {
         StartCoroutine(SpawnAir(waitTime, level));
+    }
+
+    IEnumerator SpawnNormal(GameObject tier1, GameObject tier2, Vector3 spawnPos, int flip, float waitTime, int level, bool isTier1)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        for (int i = 0; i < level; i++)
+        {
+            if (isTier1)
+            {
+                SpawnEnemy(tier1, spawnPos, flip);
+            }
+            else
+            {
+                int rnd = Random.Range(0, 100);
+                if (rnd < 70)
+                {
+                    SpawnEnemy(tier1, spawnPos, flip);
+                }
+                else
+                {
+                    SpawnEnemy(tier2, spawnPos, flip);
+                }
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (tier1 == bean)
+        {
+            GameStateScript.Instance.canSpawnVeg = true;
+        }
+        else
+        {
+            GameStateScript.Instance.canSpawnMeat = true;
+        }
     }
 
     IEnumerator SpawnWaveTier1(GameObject tier1, Vector3 spawnPos, int flip, float waitTime, int level)
@@ -108,16 +161,13 @@ public class EnemySpawn : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
 
-        if (!GameStateScript.Instance.canSpawnTier2_1 || !GameStateScript.Instance.canSpawnTier2_2)
+        if (tier1 == bean)
         {
-            if (tier1 == bean)
-            {
-                GameStateScript.Instance.canSpawnTier1_1 = true;
-            }
-            else
-            {
-                GameStateScript.Instance.canSpawnTier1_2 = true;
-            }
+            GameStateScript.Instance.canSpawnTier1_1 = true;
+        }
+        else
+        {
+            GameStateScript.Instance.canSpawnTier1_2 = true;
         }
     }
 
@@ -154,7 +204,7 @@ public class EnemySpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
 
-        for (int i = 0; i < level + 1; i++)
+        for (int i = 0; i < level; i++)
         {
             int rndTier = Random.Range(0, 100);
             int rndType = Random.Range(0, 100);
@@ -194,7 +244,7 @@ public class EnemySpawn : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
 
-        for (int i = 0; i < level - 3; i++)
+        for (int i = 0; i < level; i++)
         {
             int rnd1 = Random.Range(0, airSpawns.Length);
 
@@ -205,7 +255,7 @@ public class EnemySpawn : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        for (int i = 0; i < level - 3; i++)
+        for (int i = 0; i < level; i++)
         {
             int rnd2 = Random.Range(0, airSpawns.Length);
 

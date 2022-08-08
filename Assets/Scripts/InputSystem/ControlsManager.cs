@@ -14,6 +14,7 @@ public class ControlsManager : MonoBehaviour
     //For switching controls
     public int currentMode = 1; //0 is Swipe, 1 is Basic
     public GameObject OnScreenControls;
+    public GameObject pauseButton;
 
     //For switching characters
     public Transform startPos;
@@ -145,9 +146,11 @@ public class ControlsManager : MonoBehaviour
         for (int i = 0; i < playerCharacters.Length; i++)
         {
             playerControls[i].ChangeSide();
+            playerControls[i].TransformReset();
+            playerControls[i].ChangeAura();
         }
 
-        CameraScript.Instance.ChangeTarget();
+        CameraScript.Instance.ChangeTarget(currentCharacter.transform);
     }
 
     //Temporarily disable some components of the inactive characters
@@ -194,6 +197,14 @@ public class ControlsManager : MonoBehaviour
         else if (currentCharacter.GetComponent<RCScript>() != null)
         {
             currentCharacter.GetComponent<RCScript>().CookRiceEnd();
+        }
+    }
+
+    public void StartAura()
+    {
+        for (int i = 0; i < playerCharacters.Length; i++)
+        {
+            playerControls[i].StartAura();
         }
     }
 }

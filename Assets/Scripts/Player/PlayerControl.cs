@@ -9,6 +9,8 @@ public class PlayerControl : MonoBehaviour
     //References
     private Rigidbody2D rgbd;
     private Animator anim;
+    private SpriteRenderer sprite;
+    [SerializeField] private AuraScript aura;
     [SerializeField] private WeaponScript[] weapons; //Only for pot and rice cooker
 
     //Bool checks
@@ -18,7 +20,7 @@ public class PlayerControl : MonoBehaviour
     private float moveDirection; //Move direction updated by input direction (up, down, left, right)
 
     //Special bool checks for slamming with cutting board
-    public bool isSlaming = false;
+    public bool isSlamming = false;
     public bool isRecovering = false;
     public bool slamShakeOnce = false;
 
@@ -35,12 +37,18 @@ public class PlayerControl : MonoBehaviour
     //Currently active
     public bool isCurrent = true;
 
+    //Next layer - for invincibility after transforming
+    [SerializeField] private int nextLayer;
+
     private void Awake()
     {
         //References
         rgbd = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        
+        sprite = transform.GetChild(0).GetComponent<SpriteRenderer>();
+
+        aura = GetComponentInChildren<AuraScript>();
+
         weapons = GetComponentsInChildren<WeaponScript>();
         if (weapons.Length > 0)
         {
@@ -54,6 +62,7 @@ public class PlayerControl : MonoBehaviour
     private void Start()
     {
         ControlsManager.Instance.currentLayer = gameObject.layer;
+        nextLayer = gameObject.layer;
     }
 
     public void BasicModeOn()
@@ -83,6 +92,52 @@ public class PlayerControl : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isSlamming) //Only happens when slamming
+        {
+            if (isGrounded)
+            {
+                rgbd.velocity = new Vector2(0, 0);
+
+                if (!slamShakeOnce)
+                {
+                    CameraShake.Instance.ShakeCamera();
+                    slamShakeOnce = true;
+                }
+
+                ControlsManager.Instance.currentCharacter.GetComponent<CBScript>().ShockStart();
+            }
+            else
+            {
+                rgbd.velocity = new Vector2(moveDirection * moveSpeed / 3, -30f);
+            }
+        }
+        else if (isCooking)
+        {
+            rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+        }
+        else
+        {
+            //Update velocity every frame
+            if (isMoving)
+            {
+                rgbd.velocity = new Vector2(moveDirection * moveSpeed, rgbd.velocity.y);
+            }
+            else
+            {
+                rgbd.velocity = new Vector2(0, rgbd.velocity.y);
+            }
+
+            //Jump if the Jump button is held and the character is grounded
+            if (isJumping && isGrounded)
+            {
+                JumpEffect();
+                rgbd.velocity = new Vector2(rgbd.velocity.x, 0); //Reset velocity to preven forces of opposite directions
+                rgbd.AddForce(Vector3.up * jumpSpeed, ForceMode2D.Impulse);
+            }
+        }
+
+        #region split control, but basically the same
+        /*
         //For Swipe control
         if (ControlsManager.Instance.currentMode == 0)
         {
@@ -186,6 +241,8 @@ public class PlayerControl : MonoBehaviour
                 }
             }
         }
+        */
+        #endregion
     }
 
     //Jump when Jump button is pressed
@@ -239,6 +296,11 @@ public class PlayerControl : MonoBehaviour
         if (!ControlsManager.Instance.isAttacking)
         {
             ControlsManager.Instance.isAttacking = true;
+            
+            if (ControlsManager.Instance.currentCharacter.GetComponent<CBScript>() != null)
+            {
+                ControlsManager.Instance.currentCharacter.GetComponent<CBScript>().SlamStart();
+            }
 
             if (ControlsManager.Instance.currentCharacter.GetComponent<PlayerControl>().weapons.Length > 0)
             {
@@ -328,12 +390,63 @@ public class PlayerControl : MonoBehaviour
 
     public void ChangeSide()
     {
-        gameObject.layer = gameObject.layer == Layer.Player_Veg ? Layer.Player_Meat : Layer.Player_Veg;
-        ControlsManager.Instance.currentLayer = gameObject.layer;
+        nextLayer = nextLayer == Layer.Player_Veg ? Layer.Player_Meat : Layer.Player_Veg;
+        gameObject.layer = Layer.Invincible;
+        BlinkingSprite();
+        Invoke("EndInvincibility", 1f);
+        ControlsManager.Instance.currentLayer = nextLayer;
+    }
 
-        isSlaming = false;
+    private void EndInvincibility()
+    {
+        gameObject.layer = nextLayer;
+    }
+
+    private void BlinkingSprite()
+    {
+        StartCoroutine(Blinking());
+    }
+
+    private IEnumerator Blinking()
+    {
+        Color currentColor = Color.white;
+        Color lowOpac = new Color(currentColor.r, currentColor.g, currentColor.b, currentColor.a / 2);
+        float time = 0.5f;
+        float timeStep = 0.1f;
+
+        for (float i = 0; i < time; i += timeStep)
+        {
+            sprite.color = lowOpac;
+
+            yield return new WaitForSeconds(timeStep);
+
+            sprite.color = currentColor;
+
+            yield return new WaitForSeconds(timeStep);
+        }
+
+        sprite.color = currentColor;
+    }
+
+    public void TransformReset()
+    {
+        ControlsManager.Instance.isAttacking = false;
+        isSlamming = false;
         isRecovering = false;
         slamShakeOnce = false;
         isCooking = false;
+
+        anim.SetBool("isReset", true);
+        rgbd.constraints &= ~RigidbodyConstraints2D.FreezePositionY; //Reset the freeze Y when cutting board slams
+    }
+
+    public void ChangeAura()
+    {
+        aura.ChangeAura();
+    }
+
+    public void StartAura()
+    {
+        aura.StartAura();
     }
 }

@@ -9,7 +9,7 @@ public class CameraScript : MonoBehaviour
     public static CameraScript Instance { get; set; }
 
     //References
-    public Transform target;
+    public Transform camTarget;
     private CinemachineVirtualCamera cinemachine;
 
     private void Awake()
@@ -28,13 +28,13 @@ public class CameraScript : MonoBehaviour
 
     private void Start()
     {
-        //target = ControlsManager.Instance.currentCharacter.transform;
+        camTarget = ControlsManager.Instance.currentCharacter.transform;
         cinemachine = GetComponent<CinemachineVirtualCamera>();
 
-        ChangeTarget();
+        ChangeTarget(camTarget);
     }
 
-    public void ChangeTarget()
+    public void ChangeTarget(Transform target)
     {
         cinemachine.LookAt = target;
         cinemachine.Follow = target;

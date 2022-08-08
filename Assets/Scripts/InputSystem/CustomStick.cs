@@ -37,12 +37,20 @@ namespace UnityEngine.InputSystem.OnScreen
         private Camera cam;
 
         private Vector2 input = Vector2.zero;
+        private Vector2 rawInput = Vector2.zero; //Added
 
         public AxisOptions AxisOptions { get { return AxisOptions; } set { axisOptions = value; } }
         //end package
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            //Added
+            if (IngameTutorials.Instance.firstTouch)
+            {
+                IngameTutorials.Instance.TurnOffText(IngameTutorials.Instance.moveTutorial);
+                IngameTutorials.Instance.firstTouch = false;
+            }
+
             //Floating joystick package
             background.anchoredPosition = ScreenPointToAnchoredPosition(eventData.position);
             background.gameObject.SetActive(true);
@@ -61,9 +69,10 @@ namespace UnityEngine.InputSystem.OnScreen
             Vector2 position = RectTransformUtility.WorldToScreenPoint(cam, background.position);
             Vector2 radius = background.sizeDelta / 2;
             input = (eventData.position - position) / (radius * canvas.scaleFactor);
+            rawInput = input;
             FormatInput();
             HandleInput(input.magnitude, input.normalized, radius, cam);
-            handle.anchoredPosition = input * radius * handleRange;
+            handle.anchoredPosition = Vector2.ClampMagnitude(rawInput, 1) * radius * handleRange;
             //end package
             SendValueToControl(input);
         }
@@ -72,6 +81,7 @@ namespace UnityEngine.InputSystem.OnScreen
         {
             //Floating joystick package
             background.gameObject.SetActive(false);
+            background.localPosition = new Vector3(256f, 256f, 0);
             input = Vector2.zero;
             handle.anchoredPosition = Vector2.zero;
             //end package
@@ -96,7 +106,7 @@ namespace UnityEngine.InputSystem.OnScreen
             handle.pivot = center;
             handle.anchoredPosition = Vector2.zero;
 
-            background.gameObject.SetActive(false);
+            //background.gameObject.SetActive(false);
             //end package
         }
 
@@ -105,7 +115,8 @@ namespace UnityEngine.InputSystem.OnScreen
         {
             if (magnitude > deadZone)
             {
-                if (magnitude > 1)
+                //if (magnitude > 1)
+                if (magnitude > 0.1f)
                 {
                     input = normalised;
                 }
@@ -118,7 +129,10 @@ namespace UnityEngine.InputSystem.OnScreen
         private void FormatInput()
         {
             if (axisOptions == AxisOptions.Horizontal)
+            {
                 input = new Vector2(input.x, 0f);
+                rawInput = new Vector2(input.x, 0f); //Added
+            }
             else if (axisOptions == AxisOptions.Vertical)
                 input = new Vector2(0f, input.y);
         }

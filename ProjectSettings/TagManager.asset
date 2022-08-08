@@ -19,6 +19,8 @@ TagManager:
   - RiceBall
   - SugarCube
   - RiceBallExplosion
+  - BGM
+  - SoundFX
   layers:
   - Default
   - TransparentFX
@@ -30,7 +32,7 @@ TagManager:
   - Platform
   - Player_Veg
   - Player_Meat
-  - Fridge
+  - 
   - JumpPad
   - SugarCube
   - GroundCheck
@@ -41,8 +43,8 @@ TagManager:
   - PlatformWall
   - Enemy_Veg
   - Enemy_Meat
-  - 
-  - 
+  - Fridge_Veg
+  - Fridge_Meat
   - 
   - 
   - 

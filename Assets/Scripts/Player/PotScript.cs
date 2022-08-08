@@ -9,7 +9,7 @@ public class PotScript : MonoBehaviour
 
     private void Awake()
     {
-        hitBox = transform.GetChild(2).gameObject;
+        hitBox = transform.GetChild(3).gameObject;
         playerControl = GetComponent<PlayerControl>();
     }
 

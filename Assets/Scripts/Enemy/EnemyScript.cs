@@ -139,15 +139,15 @@ public class EnemyScript : MonoBehaviour
             isJump = true;
         }
         
-        if (collision.gameObject.layer == Layer.Fridge)
+        if (collision.gameObject.layer == Layer.Fridge_Veg || collision.gameObject.layer == Layer.Fridge_Meat)
         {
-            if (gameObject.layer == Layer.Enemy_Veg && collision.gameObject.tag == "MeatFridge")
+            if (gameObject.layer == Layer.Enemy_Veg)
             {
-                GameObject.FindGameObjectWithTag("MeatFridge").GetComponent<FridgeScript>().TakeDamage();
+                collision.gameObject.GetComponent<FridgeScript>().TakeDamage();
             }
-            else if (gameObject.layer == Layer.Enemy_Meat && collision.gameObject.tag == "VegFridge")
+            else if (gameObject.layer == Layer.Enemy_Meat)
             {
-                GameObject.FindGameObjectWithTag("VegFridge").GetComponent<FridgeScript>().TakeDamage();
+                collision.gameObject.GetComponent<FridgeScript>().TakeDamage();
             }
 
             int rndEffect = Random.Range(0, EffectReferences.Instance.fridgeHitEffects.Length);

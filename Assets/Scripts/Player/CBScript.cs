@@ -8,11 +8,15 @@ public class CBScript : MonoBehaviour
     private GameObject hitBoxShock;
     private PlayerControl playerControl;
 
+    private Animator anim;
+
     private void Awake()
     {
-        hitBoxSlam = transform.GetChild(2).gameObject;
-        hitBoxShock = transform.GetChild(3).gameObject;
+        hitBoxSlam = transform.GetChild(3).gameObject;
+        hitBoxShock = transform.GetChild(4).gameObject;
         playerControl = GetComponent<PlayerControl>();
+
+        anim = GetComponent<Animator>();
     }
 
     private void SlamWindUp()
@@ -24,16 +28,29 @@ public class CBScript : MonoBehaviour
         }
     }
 
+    public void SlamStart()
+    {
+        anim.SetBool("isSlamming", true);
+    }
+
     private void Slam()
     {
         if (playerControl.isCurrent)
         {
             hitBoxSlam.SetActive(true);
-            playerControl.isSlaming = true;
+            playerControl.isSlamming = true;
             playerControl.GetComponent<Rigidbody2D>().constraints &= ~RigidbodyConstraints2D.FreezePositionY;
-
-            hitBoxShock.SetActive(true);
         }
+    }
+
+    public void ShockStart()
+    {
+        hitBoxShock.SetActive(true);
+    }
+
+    private void SlamDone()
+    {
+        anim.SetBool("isSlamming", false);
     }
 
     private void Recover()
@@ -44,7 +61,7 @@ public class CBScript : MonoBehaviour
 
     public void SlamEnd()
     {
-        playerControl.isSlaming = false;
+        playerControl.isSlamming = false;
         gameObject.layer = ControlsManager.Instance.currentLayer;
         playerControl.isRecovering = false;
         playerControl.slamShakeOnce = false;

@@ -32,7 +32,7 @@ public class RestartScript : MonoBehaviour
         ControlsManager.Instance.EndAttack();
         ControlsManager.Instance.currentCharacter.SetActive(true);
         ControlsManager.Instance.currentCharacter.transform.position = defaultSpawn.position;
-        CameraScript.Instance.ChangeTarget();
+        CameraScript.Instance.ChangeTarget(ControlsManager.Instance.currentCharacter.transform);
 
         GameObject[] riceBalls = GameObject.FindGameObjectsWithTag("RiceBall");
         for (int i = 0; i < riceBalls.Length; i++)

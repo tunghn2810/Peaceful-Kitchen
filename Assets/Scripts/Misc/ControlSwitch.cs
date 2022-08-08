@@ -10,6 +10,8 @@ public class ControlSwitch : MonoBehaviour
     public Sprite gamepadControl;
     public Sprite touchControl;
 
+    public GameObject warningBoard;
+
     public void Switch()
     {
         if (ControlsManager.Instance.currentMode == 0)
@@ -23,6 +25,7 @@ public class ControlSwitch : MonoBehaviour
             ControlsManager.Instance.currentMode = 0;
             controlType.sprite = touchControl;
             controlType.SetNativeSize();
+            warningBoard.SetActive(true);
         }
     }
 }

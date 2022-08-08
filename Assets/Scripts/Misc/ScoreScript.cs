@@ -8,6 +8,10 @@ public class ScoreScript : MonoBehaviour
     public TMP_Text scoreText;
     public int score = 0;
 
+    public TMP_Text highScoreText;
+    public int highScore = 0;
+    public GameObject newHighScore;
+
     private bool canSpawnTier2 = true;
     private bool canSpawnAir = true;
     private bool canSpawnMid = true;
@@ -29,6 +33,11 @@ public class ScoreScript : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        LoadHighScore();
+    }
+
     private void LateUpdate()
     {
         scoreText.text = score.ToString();
@@ -39,6 +48,7 @@ public class ScoreScript : MonoBehaviour
             {
                 GameStateScript.Instance.canSpawnTier2_1 = true;
                 GameStateScript.Instance.canSpawnTier2_2 = true;
+                GameStateScript.Instance.isSpawningTier1 = false;
                 canSpawnTier2 = false;
             }
         }
@@ -58,6 +68,13 @@ public class ScoreScript : MonoBehaviour
                 canSpawnMid = false;
             }
         }
+
+        if (score > highScore)
+        {
+            highScore = score;
+            SaveHighScore();
+            newHighScore.SetActive(true);
+        }
     }
 
     public void ResetScore()
@@ -66,5 +83,26 @@ public class ScoreScript : MonoBehaviour
         canSpawnTier2 = true;
         canSpawnAir = true;
         canSpawnMid = true;
+
+        newHighScore.SetActive(false);
+    }
+
+    public void SaveHighScore()
+    {
+        PlayerPrefs.SetInt("HighScore", score);
+        highScoreText.text = highScore.ToString();
+    }
+
+    public void LoadHighScore()
+    {
+        if (PlayerPrefs.HasKey("HighScore"))
+        {
+            highScore = PlayerPrefs.GetInt("HighScore");
+            highScoreText.text = highScore.ToString();
+        }
+        else
+        {
+            PlayerPrefs.SetInt("HighScore", 0);
+        }
     }
 }

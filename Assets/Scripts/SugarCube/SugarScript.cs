@@ -16,9 +16,6 @@ public class SugarScript : MonoBehaviour
             //Transform the player
             ControlsManager.Instance.Transformation();
 
-            //Reset variables
-            
-
             //Switch control - Currently not needed
             ControlsManager.Instance.ControlInit();
 
@@ -29,7 +26,7 @@ public class SugarScript : MonoBehaviour
             ScoreScript.Instance.score++;
 
             //Change side
-            BorderScript.Instance.ChangeBorder();
+            //BorderScript.Instance.ChangeBorder();
 
             //Change pointer target
             SugarPointer.Instance.ChangeTarget();
